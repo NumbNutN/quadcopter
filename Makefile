@@ -57,11 +57,15 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c \
-Src/system_stm32f4xx.c  
+Src/system_stm32f4xx.c \
+uC-OS2/Source/ucos_ii.c \
+uC-OS2/Source/os_dbg_r.c \
+uC-OS2/Ports/os_cpu_c.c 
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f401xe.s
+startup_stm32f401xe.s \
+uC-OS2/Ports/os_cpu_a.s
 
 
 #######################################
@@ -118,7 +122,10 @@ C_INCLUDES =  \
 -IDrivers/STM32F4xx_HAL_Driver/Inc \
 -IDrivers/STM32F4xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include
+-IDrivers/CMSIS/Include \
+-Iuc-OS2/Source \
+-Iuc-OS2/Ports \
+-Iuc-OS2/Cfg/Template
 
 
 # compile gcc flags

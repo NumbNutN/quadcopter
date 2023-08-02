@@ -1,0 +1,6 @@
+##Develop Tooltrain
+.vscode
+.cache
+compile_commands.json
+##Temp Directory when building the project
+build
