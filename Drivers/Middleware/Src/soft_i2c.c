@@ -1,10 +1,12 @@
 #include "i2c.h"
+#include "os.h"
+#include "delay.h"
 
 #define DELAY_TIME	20
 
 
 /**
-  * @brief SDAÏßÊäÈëÄ£Ê½ÅäÖÃ
+  * @brief SDAçº¿è¾“å…¥æ¨¡å¼é…ç½®
   * @param None
   * @retval None
   */
@@ -12,7 +14,7 @@ void SDA_Input_Mode()
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    GPIO_InitStructure.Pin = GPIO_PIN_7;
+    GPIO_InitStructure.Pin = GPIO_PIN_9;
     GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
     GPIO_InitStructure.Pull = GPIO_PULLUP;
     GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -20,7 +22,7 @@ void SDA_Input_Mode()
 }
 
 /**
-  * @brief SDAÏßÊä³öÄ£Ê½ÅäÖÃ
+  * @brief SDAçº¿è¾“å‡ºæ¨¡å¼é…ç½®
   * @param None
   * @retval None
   */
@@ -28,7 +30,7 @@ void SDA_Output_Mode()
 {
     GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    GPIO_InitStructure.Pin = GPIO_PIN_7;
+    GPIO_InitStructure.Pin = GPIO_PIN_9;
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
     GPIO_InitStructure.Pull = GPIO_NOPULL;
     GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -36,102 +38,90 @@ void SDA_Output_Mode()
 }
 
 /**
-  * @brief SDAÏßÊä³öÒ»¸öÎ»
-  * @param val Êä³öµÄÊý¾Ý
+  * @brief SDAçº¿è¾“å‡ºä¸€ä¸ªä½
+  * @param val è¾“å‡ºçš„æ•°æ®
   * @retval None
   */
 void SDA_Output( uint16_t val )
 {
     if ( val )
     {
-        GPIOB->BSRR |= GPIO_PIN_7;
+        GPIOB->BSRR |= GPIO_PIN_9;
     }
     else
     {
-        GPIOB->BRR |= GPIO_PIN_7;
+        GPIOB->BSRR |= (GPIO_PIN_9 << sizeof(uint16_t)*8);
     }
 }
 
 /**
-  * @brief SCLÏßÊä³öÒ»¸öÎ»
-  * @param val Êä³öµÄÊý¾Ý
+  * @brief SCLçº¿è¾“å‡ºä¸€ä¸ªä½
+  * @param val è¾“å‡ºçš„æ•°æ®
   * @retval None
   */
 void SCL_Output( uint16_t val )
 {
     if ( val )
     {
-        GPIOB->BSRR |= GPIO_PIN_6;
+        GPIOB->BSRR |= GPIO_PIN_8;
     }
     else
     {
-        GPIOB->BRR |= GPIO_PIN_6;
+        GPIOB->BSRR |= (GPIO_PIN_8 << sizeof(uint16_t)*8);
     }
 }
 
 /**
-  * @brief SDAÊäÈëÒ»Î»
+  * @brief SDAè¾“å…¥ä¸€ä½
   * @param None
-  * @retval GPIO¶ÁÈëÒ»Î»
+  * @retval GPIOè¯»å…¥ä¸€ä½
   */
 uint8_t SDA_Input(void)
 {
-	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_7) == GPIO_PIN_SET){
+	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9) == GPIO_PIN_SET){
 		return 1;
 	}else{
 		return 0;
 	}
 }
 
-
 /**
-  * @brief I2CµÄ¶ÌÔÝÑÓÊ±
-  * @param None
-  * @retval None
-  */
-static void delay1(unsigned int n)
-{
-    uint32_t i;
-    for ( i = 0; i < n; ++i);
-}
-
-/**
-  * @brief I2CÆðÊ¼ÐÅºÅ
+  * @brief I2Cèµ·å§‹ä¿¡å·
   * @param None
   * @retval None
   */
 void I2CStart(void)
 {
     SDA_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SDA_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
 }
 
 /**
-  * @brief I2C½áÊøÐÅºÅ
+  * @brief I2Cç»“æŸä¿¡å·
   * @param None
   * @retval None
   */
 void I2CStop(void)
 {
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SDA_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SDA_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
 
 }
 
 /**
-  * @brief I2CµÈ´ýÈ·ÈÏÐÅºÅ
+  * @brief I2Cç­‰å¾…ç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
@@ -139,13 +129,13 @@ unsigned char I2CWaitAck(void)
 {
     unsigned short cErrTime = 5;
     SDA_Input_Mode();
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     while(SDA_Input())
     {
         cErrTime--;
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
         if (0 == cErrTime)
         {
             SDA_Output_Mode();
@@ -155,47 +145,47 @@ unsigned char I2CWaitAck(void)
     }
     SDA_Output_Mode();
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     return SUCCESS;
 }
 
 /**
-  * @brief I2C·¢ËÍÈ·ÈÏÐÅºÅ
+  * @brief I2Cå‘é€ç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
 void I2CSendAck(void)
 {
     SDA_Output(0);
-    delay1(DELAY_TIME);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
 
 }
 
 /**
-  * @brief I2C·¢ËÍ·ÇÈ·ÈÏÐÅºÅ
+  * @brief I2Cå‘é€éžç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
 void I2CSendNotAck(void)
 {
     SDA_Output(1);
-    delay1(DELAY_TIME);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(1);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
 
 }
 
 /**
-  * @brief I2C·¢ËÍÒ»¸ö×Ö½Ú
-  * @param cSendByte ÐèÒª·¢ËÍµÄ×Ö½Ú
+  * @brief I2Cå‘é€ä¸€ä¸ªå­—èŠ‚
+  * @param cSendByte éœ€è¦å‘é€çš„å­—èŠ‚
   * @retval None
   */
 void I2CSendByte(unsigned char cSendByte)
@@ -204,22 +194,24 @@ void I2CSendByte(unsigned char cSendByte)
     while (i--)
     {
         SCL_Output(0);
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
         SDA_Output(cSendByte & 0x80);
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
         cSendByte += cSendByte;
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
         SCL_Output(1);
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
     }
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
+    //ADD å‘é€å­—èŠ‚ç»“æŸåŽå°†SDAé‡æ–°æ‹‰é«˜
+    SDA_Output(1);
 }
 
 /**
-  * @brief I2C½ÓÊÕÒ»¸ö×Ö½Ú
+  * @brief I2CæŽ¥æ”¶ä¸€ä¸ªå­—èŠ‚
   * @param None
-  * @retval ½ÓÊÕµ½µÄ×Ö½Ú
+  * @retval æŽ¥æ”¶åˆ°çš„å­—èŠ‚
   */
 unsigned char I2CReceiveByte(void)
 {
@@ -230,26 +222,104 @@ unsigned char I2CReceiveByte(void)
     {
         cR_Byte += cR_Byte;
         SCL_Output(0);
-        delay1(DELAY_TIME);
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
+        delay_us(DELAY_TIME);
         SCL_Output(1);
-        delay1(DELAY_TIME);
+        delay_us(DELAY_TIME);
         cR_Byte |=  SDA_Input();
     }
     SCL_Output(0);
-    delay1(DELAY_TIME);
+    delay_us(DELAY_TIME);
     SDA_Output_Mode();
     return cR_Byte;
 }
 
-//
-void I2CInit(void)
-{
-		GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    GPIO_InitStructure.Pin = GPIO_PIN_7 | GPIO_PIN_6;
-    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStructure.Pull = GPIO_PULLUP;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+void SOFT_I2C_Init(uint32_t i2c)
+{
+    if(i2c == (uint32_t)I2C1)
+    {
+        GPIO_InitTypeDef GPIO_InitStructure = {0};
+        GPIO_InitStructure.Pin = GPIO_PIN_9 | GPIO_PIN_8;
+        GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
+        GPIO_InitStructure.Pull = GPIO_PULLUP;
+        GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+        SDA_Output(1);
+        SCL_Output(1);
+    }
+}
+
+/**
+ * @brief I2C_Wrtie interfce implemented by "SOFT"
+ */
+void SOFT_I2C_Write(uint32_t i2c, uint8_t addr, const uint8_t *data, size_t n){
+    size_t idx = 0;
+    OS_CPU_SR cpu_sr;
+    if(n <= 0)return;
+    OS_ENTER_CRITICAL();
+    if(i2c == (uint32_t)I2C1){
+        I2CStart();
+        I2CSendByte(addr);         
+        I2CWaitAck();                
+        while (n--) {
+            I2CSendByte(data[idx++]);
+            I2CWaitAck();      
+        }
+        I2CStop();
+    }
+    OS_EXIT_CRITICAL();
+}
+
+/**
+ * @brief I2C_Read interface implemented by "SOFT"
+ */
+void SOFT_I2C_Read(uint32_t i2c, uint8_t addr, uint8_t *buf, size_t n){
+    size_t idx = 0;
+    if(n <= 0)return;
+    OS_CPU_SR cpu_sr;
+    OS_ENTER_CRITICAL();
+    if(i2c == (uint32_t)I2C1){
+        I2CStart();        
+        I2CSendByte(addr);         
+        I2CWaitAck();                
+        while (n--) {
+            buf[idx++] = I2CReceiveByte();
+            if(n)I2CSendAck();      
+            else I2CSendNotAck();
+        }
+        I2CStop();
+    }
+    OS_EXIT_CRITICAL();
+}
+
+/**
+ * @brief I2C_Transfer interface implemented by "SOFT"
+ */
+void SOFT_I2C_Transfer(uint32_t i2c, uint8_t waddr, const uint8_t *w, size_t wn,uint8_t raddr,
+                       uint8_t *r, size_t rn)   {
+    size_t idx = 0;
+    OS_CPU_SR cpu_sr;
+    OS_ENTER_CRITICAL();
+    if(wn > 0){
+        I2CStart();
+        I2CSendByte(waddr);        
+        I2CWaitAck();                
+        while (wn--) {
+            I2CSendByte(w[idx++]);
+            I2CWaitAck();
+        }
+    }
+    if(rn > 0){
+        I2CStart();
+        I2CSendByte(raddr);    
+        I2CWaitAck();                  
+        while (rn--) {
+            r[idx++] = I2CReceiveByte();
+            if(rn)I2CSendAck();
+            else I2CSendNotAck();
+        }
+    }
+    if(rn > 0 || wn > 0)I2CStop();
+    OS_EXIT_CRITICAL();
 }
