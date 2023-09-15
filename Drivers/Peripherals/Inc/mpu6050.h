@@ -1,6 +1,9 @@
 #ifndef _MPU6050_H
 #define _MPU6050_H
 
+#define MPU6050_ADDRESS_W   0xD0
+#define MPU6050_ADDRESS_R   0xD1
+
 #include "stdint.h"
 
 void MPU6050_Init();

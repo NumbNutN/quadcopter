@@ -63,8 +63,12 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c \
 \
 Drivers/Middleware/Src/hard_i2c.c \
+Drivers/Middleware/Src/soft_i2c.c \
 Drivers/Middleware/Src/delay.c \
+Drivers/Middleware/Src/newlib_interface.c \
+\
 Drivers/Peripherals/Src/mpu6050.c \
+Drivers/Peripherals/Src/ssd1306_i2c.c \
 \
 Src/system_stm32f4xx.c \
 \
@@ -166,9 +170,9 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = STM32F401RETx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LIBS = -lc -lm -lnosys -lc
+LIBDIR = -L/usr/lib/arm-none-eabi/newlib/thumb/v7e-m+fp/hard
+LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin

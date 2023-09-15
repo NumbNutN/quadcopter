@@ -2,7 +2,7 @@
 #define _CONFIG_H
 
 /* define used i2c interface */
-#define I2C_USE_HARD
+#define I2C_USE_SOFT
 
 
 

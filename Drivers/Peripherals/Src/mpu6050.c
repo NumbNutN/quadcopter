@@ -1,6 +1,7 @@
 #include "stm32f4xx.h"
 #include "i2c.h"  /* hi2c1 */
 #include "hard_i2c.h"
+#include "mpu6050.h"
 
 void MPU6050_Init()
 {

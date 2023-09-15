@@ -94,10 +94,15 @@ int main(void)
 
   /* Initialize peripherals hardware */
   Peripherals_Init();
+  /* Testing before OS */
+  Test_Bf_OS();
+  
   /* Initialize UcosII */
   OSInit();
   /* task initialization */
   Task_Init();
+  /* Task for Testing Initialization */
+  Test_Task_Init();
   /* start ucosii */
   OSStart();
 

@@ -1,14 +1,6 @@
 #ifndef _HARD_I2C_H
 #define _HARD_I2C_H
 
-#define MPU6050_ADDRESS_W   0xD0
-#define MPU6050_ADDRESS_R   0xD1
-
-enum I2C_RECV_SEQ{
-    I2C_NORMAL_RECV,
-    I2C_READ_AFTER_WRITE_SEQUENCE
-};
-
 #define I2C_EV5     do{}while(!Hard_I2CStatusCheck(I2C_SR1_SB,0))     //读取SR1后将地址写至DR清除
 #define I2C_EV6     do{}while(!Hard_I2CStatusCheck(I2C_SR1_ADDR,0))   //读取SR1后读取SR2清除
 //在写入数据前检测

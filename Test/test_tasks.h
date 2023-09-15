@@ -17,3 +17,5 @@
 * @brief gy-86数据采集
 */
 extern void Test_Task_MPU6050_Get_Data_Init(void);
+
+extern void TEST_SSD1306_PutChar(void);

@@ -11,10 +11,6 @@ void Task_Init(void){
 
     //TASK_BEFORE_OS_INIT
 
-    /* task for testing initialization */
-    
-    //MPU6050 Read Data
-    Test_Task_MPU6050_Get_Data_Init();
 }
 
 /**
@@ -26,3 +22,11 @@ void Peripherals_Init(void){
 
 }
 
+void Test_Task_Init(void){
+    //MPU6050 Read Data
+    Test_Task_MPU6050_Get_Data_Init();
+}
+
+void Test_Bf_OS(void){
+    TEST_SSD1306_PutChar();
+}
