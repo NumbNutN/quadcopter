@@ -15,9 +15,10 @@ uint8_t mpu6050_buf[6];
 */
 void TEST_Task_MPU6050_Get_Data(void* arg)
 {
+    float x,y,z;
     for(;;)
     {
-        MPU6050_Read_Scaler(mpu6050_buf,mpu6050_pos,6);
+        MPU6050_Get_Gyroscope(&x,&y,&z);
         OSTimeDlyHMSM(0, 0,0,100);
     }
 }
