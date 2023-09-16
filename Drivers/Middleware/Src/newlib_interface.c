@@ -34,14 +34,15 @@ _write_r (struct _reent *ptr,
     char ch;
     for(i=0;i<cnt;++i)
     {
+        OLED_ScreenSwitchCheck();
         ch = *(char*)buf;
-        if(*(char*)buf == '\n')
+        if(ch == '\n')
             OLED_Newline();
         else
         {
-            OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)buf++));
             OLED_Update_Pos();
+            OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)buf++));
         }
     }
-    return cnt;    
+    return cnt;
 }

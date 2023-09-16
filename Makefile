@@ -170,7 +170,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = STM32F401RETx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys -lc
+LIBS = -lc -lm -lnosys
 LIBDIR = -L/usr/local/lib/newlib/4.3.0/thumb/v7e-m+fp/hard
 LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 

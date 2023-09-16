@@ -7,6 +7,7 @@
 uint8_t _ssd1306_pos_x =0;
 uint8_t _ssd1306_pos_y =0;
 
+uint8_t do_screen_strategy = 0;
 
 //常用ASCII表
 //偏移量32
@@ -205,8 +206,7 @@ void OLED_Update_Pos()
         _ssd1306_pos_x += 1;
     }
     
-    if(_ssd1306_pos_x > 7){
-        OLED_Clean();
+    if(_ssd1306_pos_x > 3){
         _ssd1306_pos_x = 0;
     }
 }
@@ -214,8 +214,13 @@ void OLED_Update_Pos()
 void OLED_Newline(){
     _ssd1306_pos_y = 0;
     _ssd1306_pos_x += 1;
-    if(_ssd1306_pos_x > 7){
-    OLED_Clean();
+    if(_ssd1306_pos_x > 3){
     _ssd1306_pos_x = 0;
+    }
 }
+
+void OLED_ScreenSwitchCheck()
+{
+    if(_ssd1306_pos_x == 0 && _ssd1306_pos_y == 0)
+        if(do_screen_strategy)OLED_Clean();
 }

@@ -18,7 +18,7 @@ extern uint8_t _ssd1306_pos_y;
 
 
 void SSD1306_Init();
-
+ 
 /**
  * @brief 清空屏幕
 */
@@ -37,5 +37,6 @@ void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr);
 
 void OLED_Update_Pos();
 void OLED_Newline();
+void OLED_ScreenSwitchCheck();
 
 #endif
