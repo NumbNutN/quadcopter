@@ -1,3 +1,6 @@
 [submodule "uC-OS2"]
 	path = uC-OS2
 	url = git@github.com:NumbNutN/uC-OS2.git
+[submodule "EmbeddedLapack"]
+	path = EmbeddedLapack
+	url = git@github.com:DanielMartensson/EmbeddedLapack.git

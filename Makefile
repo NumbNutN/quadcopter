@@ -71,14 +71,23 @@ Drivers/Peripherals/Src/mpu6050.c \
 Drivers/Peripherals/Src/ssd1306_i2c.c \
 \
 Src/system_stm32f4xx.c \
+Src/math.c \
 \
 uC-OS2/Source/ucos_ii.c \
 uC-OS2/Source/os_dbg_r.c \
 uC-OS2/Ports/os_cpu_c.c \
 \
 Src/init.c \
+Src/quat_math.c \
 \
-Test/test_tasks.c
+Test/test_tasks.c \
+$(wildcard EmbeddedLapack/EmbeddedLapack/src/Lapack/Blas/*.c) \
+$(wildcard EmbeddedLapack/EmbeddedLapack/src/Lapack/F2c/*.c) \
+$(wildcard EmbeddedLapack/EmbeddedLapack/src/Lapack/Install/*.c) \
+$(wildcard EmbeddedLapack/EmbeddedLapack/src/Lapack/Scr/*.c) \
+$(wildcard /mnt/d/Coding/stm32/quadcopter/EmbeddedLapack/EmbeddedLapack/src/LinearAlgebra/*.c)
+
+
 
 # ASM sources
 ASM_SOURCES =  \
@@ -146,7 +155,8 @@ C_INCLUDES =  \
 -Iuc-OS2/Cfg/Template \
 -IDrivers/Middleware/Inc \
 -IDrivers/Peripherals/Inc \
--ITest 
+-ITest \
+-IEmbeddedLapack/EmbeddedLapack/src
 
 
 # compile gcc flags
@@ -218,4 +228,4 @@ clean:
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
 
-# *** EOF ***
+# *** EOF *** 
