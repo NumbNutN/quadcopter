@@ -1,13 +1,15 @@
 #include <stdint.h>
+#include <stdio.h>
 
 #include "os.h"
 #include "mpu6050.h"
 #include "test_tasks.h"
 
 OS_STK Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE];
+OS_STK Stk_MPU6050_Print_Data[TASK_MPU6050_GET_DATA_STACK_SIZE];
 
 uint8_t mpu6050_pos[6] = {0x3B,0x3C,0x3D,0x3E,0x3F,0x40};
-uint8_t mpu6050_buf[6];
+float mpu6050_gyro[3];
 
 /**
 * @brief gy-86数据采集
@@ -15,11 +17,21 @@ uint8_t mpu6050_buf[6];
 */
 void TEST_Task_MPU6050_Get_Data(void* arg)
 {
-    float x,y,z;
     for(;;)
     {
-        MPU6050_Get_Gyroscope(&x,&y,&z);
+        MPU6050_Get_Gyroscope(&mpu6050_gyro[0],&mpu6050_gyro[1],&mpu6050_gyro[2]);
         OSTimeDlyHMSM(0, 0,0,100);
+    }
+}
+
+void TEST_Task_MPU6050_Print_Data(void* arg)
+{
+    for(;;)
+    {
+        printf("pitch:%.2f\n",mpu6050_gyro[0]);
+        printf("yaw:%.2f\n",mpu6050_gyro[1]);
+        printf("roll:%.2f\n\n",mpu6050_gyro[2]);
+        OSTimeDlyHMSM(0, 0,2,0);
     }
 }
 
@@ -28,4 +40,5 @@ void TEST_Task_MPU6050_Get_Data_Init()
 {
     MPU6050_Init();
     OSTaskCreate(TEST_Task_MPU6050_Get_Data, (void*)0, &Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_MPU6050_GET_DATA_PRIO);
+    OSTaskCreate(TEST_Task_MPU6050_Print_Data, (void*)0, &Stk_MPU6050_Print_Data[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_MPU6050_GET_PRINT_PRIO);
 }

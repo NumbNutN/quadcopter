@@ -300,23 +300,26 @@ void SOFT_I2C_Transfer(uint32_t i2c, uint8_t waddr, const uint8_t *w, size_t wn,
                        uint8_t *r, size_t rn)   {
     size_t idx = 0;
     OS_CPU_SR cpu_sr;
+    uint8_t tmp_wn = wn;
+    uint8_t tmp_rn = rn;
     OS_ENTER_CRITICAL();
-    if(wn > 0){
+    if(tmp_wn > 0){
         I2CStart();
         I2CSendByte(waddr);        
         I2CWaitAck();                
-        while (wn--) {
+        while (tmp_wn--) {
             I2CSendByte(w[idx++]);
             I2CWaitAck();
         }
     }
-    if(rn > 0){
+    idx = 0;
+    if(tmp_rn > 0){
         I2CStart();
         I2CSendByte(raddr);    
         I2CWaitAck();                  
-        while (rn--) {
+        while (tmp_rn--) {
             r[idx++] = I2CReceiveByte();
-            if(rn)I2CSendAck();
+            if(tmp_rn)I2CSendAck();
             else I2CSendNotAck();
         }
     }
