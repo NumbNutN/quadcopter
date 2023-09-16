@@ -4,6 +4,10 @@
 #include "i2c.h"
 #include "ssd1306_i2c.h"
 
+uint8_t _ssd1306_pos_x =0;
+uint8_t _ssd1306_pos_y =0;
+
+
 //常用ASCII表
 //偏移量32
 //大小12*6
@@ -117,7 +121,7 @@ void SSD1306_Send_Data(uint8_t dat){
 void SSD1306_Init(){
     SSD1306_Send_Command(0xAE);     /* 关闭显示 */
     SSD1306_Send_Command(0x40);         /* set low column address */
-    SSD1306_Send_Command(0xB0);         /* Ser high column address */
+    SSD1306_Send_Command(0xB0);         /* set high column address */
     SSD1306_Send_Command(0xC8);             /* not offset */
 
     SSD1306_Send_Command(0x81);             /* 设置对比度 */
@@ -176,9 +180,9 @@ void OLED_Fill(){
  * @brief 设置当前指针
 */
 void OLED_Set_Pos(uint16_t x,uint16_t y){
-    SSD1306_Send_Command(0xB0+y);
-    SSD1306_Send_Command(((x&0xf0)>>4) | 0x10);
-    SSD1306_Send_Command((x&0x0f));
+    SSD1306_Send_Command(0xB0+x);
+    SSD1306_Send_Command(((y&0xf0)>>4) | 0x10);
+    SSD1306_Send_Command((y&0x0f));
 }
 
 /**
@@ -193,3 +197,25 @@ void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr){
 }
 
 
+void OLED_Update_Pos()
+{
+    _ssd1306_pos_y += 6;
+    if(_ssd1306_pos_y > (127 - 6)) {
+        _ssd1306_pos_y = 0;
+        _ssd1306_pos_x += 1;
+    }
+    
+    if(_ssd1306_pos_x > 7){
+        OLED_Clean();
+        _ssd1306_pos_x = 0;
+    }
+}
+
+void OLED_Newline(){
+    _ssd1306_pos_y = 0;
+    _ssd1306_pos_x += 1;
+    if(_ssd1306_pos_x > 7){
+    OLED_Clean();
+    _ssd1306_pos_x = 0;
+}
+}

@@ -8,11 +8,8 @@ void TEST_SSD1306_PutChar(void){
 
     OLED_Clean();
 
-    // OLED_ShowChar(0, 0, 'H');
-    // OLED_ShowChar(1*6, 0, 'e');
-    // OLED_ShowChar(2*6, 0, 'l');
-    // OLED_ShowChar(3*6, 0, 'l');
-    // OLED_ShowChar(4*6, 0, 'o');
-
     printf("%c",'H');
+    printf("hello\n");
+    printf("%d\n",77);
+    printf("%f\n",3.1415926);
 }
