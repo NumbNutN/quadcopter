@@ -71,7 +71,6 @@ Drivers/Peripherals/Src/mpu6050.c \
 Drivers/Peripherals/Src/ssd1306_i2c.c \
 \
 Src/system_stm32f4xx.c \
-Src/math.c \
 \
 uC-OS2/Source/ucos_ii.c \
 uC-OS2/Source/os_dbg_r.c \

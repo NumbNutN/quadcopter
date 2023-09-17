@@ -18,6 +18,8 @@ enum FULL_Scale_Range{
 
 #define MPU6050_PWR_MGMT_1_TEMP_DIS (1u << 3)
 
+#define PI 3.141592654
+
 void MPU6050_Init()
 {
     //内部晶振设为8Mhz 不睡眠 不循环 关闭温度采样
@@ -69,9 +71,9 @@ uint8_t MPU6050_Get_Gyroscope(float* alpha,float* beta,float* gama)
     yout = buffer[2]<<8 | buffer[3];
     zout = buffer[4]<<8 | buffer[5];
 
-    *alpha = (xout) / (65536.0f / (_FS_SEL*2));
-    *beta = (yout) / (65536.0f / (_FS_SEL*2));
-    *gama = (zout) / (65536.0f / (_FS_SEL*2));
+    *alpha = (xout) / (65536.0f / (_FS_SEL*2)) / 180 * PI;
+    *beta = (yout) / (65536.0f / (_FS_SEL*2)) / 180 * PI;
+    *gama = (zout) / (65536.0f / (_FS_SEL*2)) / 180 * PI;
 
     return 0;
 }

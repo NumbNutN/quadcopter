@@ -3,6 +3,15 @@
 #include <math.h>
 
 #include "LinearAlgebra/declareFunctions.h"
+#include "delay.h"
+
+double cur_quat[4] = {1.0,0,0,0};
+uint64_t _euler_angle_told;
+
+void _start_count_euler_angle()
+{
+    _euler_angle_told = Get_TimeStamp();
+}
 
 void quat2mat(double* mat,double* quat)
 {
@@ -17,6 +26,7 @@ void quat2mat(double* mat,double* quat)
 
 void Runge_Kutta_1st(double* newquat,double* quat,double* gyro,float deltaT)
 {
+    _start_count_euler_angle();
     double runge_kutta_mat[4][3] = RUNGE_KUTTA_1ST_MATRIX(quat[0], quat[1], quat[2], quat[3]);
     mul((double*)runge_kutta_mat,gyro,false,newquat,4,3,1);
     scale(newquat, 0.5*deltaT, 4, 1);

@@ -1,6 +1,8 @@
 #ifndef _MATH_H
 #define _MATH_H
 
+#include <stdint.h>
+
 #define ROTATION_MATRIX_ZYX(x,y,z)  { \
     {cos(z)*cos(y),-cos(x)*sin(z)+sin(y)*sin(x)*cos(z),sin(x)*sin(z)+sin(y)*sin(x)*cos(z)}, \
     {cos(y)*sin(z),cos(x)*cos(z)+sin(y)*sin(x)*sin(z),-sin(x)*cos(z)+sin(y)*cos(x)*sin(z)}, \
@@ -13,6 +15,9 @@
     {q4,q1,-q2}, \
     {-q3,q2,q1} \
     }
+
+extern double cur_quat[4];
+extern uint64_t _euler_angle_told;
 
 void quat2mat(double* mat,double* quat);
 void Runge_Kutta_1st(double* newquat,double* quat,double* eulerAngle,float deltaT);
