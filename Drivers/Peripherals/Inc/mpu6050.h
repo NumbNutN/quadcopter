@@ -17,6 +17,6 @@ void MPU6050_Read_Scaler(uint8_t* buf,uint8_t* pos,uint8_t size);
 /**
  * @brief read Gyroscope data from mpu6050
 */
-uint8_t MPU6050_Get_Gyroscope(float* alpha,float* beta,float* gama);
+uint8_t MPU6050_Get_Gyroscope(double* alpha,double* beta,double* gama);
 
 #endif

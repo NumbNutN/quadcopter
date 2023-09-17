@@ -16,11 +16,12 @@
     {-q3,q2,q1} \
     }
 
+
 extern double cur_quat[4];
 extern uint64_t _euler_angle_told;
 
 void quat2mat(double* mat,double* quat);
-void Runge_Kutta_1st(double* newquat,double* quat,double* eulerAngle,float deltaT);
+void Runge_Kutta_1st(double* quat,double* gyro,float deltaT);
 void quat2eulerAngle_zyx(double* quat,double* x,double* y,double* z);
 
 #endif

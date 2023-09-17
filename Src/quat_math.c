@@ -24,13 +24,27 @@ void quat2mat(double* mat,double* quat)
     *(mat + 4*0 + 3) = *(mat + 4*1 + 2) = -quat[3];
 }
 
-void Runge_Kutta_1st(double* newquat,double* quat,double* gyro,float deltaT)
+void Quat_Normalization(double* A,double* C)
 {
+    double length = sqrt(pow(A[0],2)+pow(A[1],2)+pow(A[2],2)+pow(A[3],2));
+    C[0] = A[0] /length;
+    C[1] = A[1] /length;
+    C[2] = A[2] /length;
+    C[3] = A[3] /length;
+}
+
+void Runge_Kutta_1st(double* quat,double* gyro,float deltaT)
+{
+    double q_afterScale[4];
+    double q_afterAdd[4];
+    double q_afterNorm[4];
     _start_count_euler_angle();
     double runge_kutta_mat[4][3] = RUNGE_KUTTA_1ST_MATRIX(quat[0], quat[1], quat[2], quat[3]);
-    mul((double*)runge_kutta_mat,gyro,false,newquat,4,3,1);
-    scale(newquat, 0.5*deltaT, 4, 1);
-    add(newquat, newquat, quat, 4, 1, 1);
+    mul((double*)runge_kutta_mat,gyro,false,q_afterScale,4,3,1);
+    scale(q_afterScale, 0.5*deltaT, 4, 1);
+    add(quat, q_afterScale, q_afterAdd, 4, 1, 1);
+    Quat_Normalization(q_afterAdd,q_afterNorm);
+    memcpy(quat, q_afterNorm,4*sizeof(double));
 }
 
 void quat2eulerAngle_zyx(double* quat,double* x,double* y,double* z)
@@ -43,3 +57,4 @@ void quat2eulerAngle_zyx(double* quat,double* x,double* y,double* z)
     *x = atan((2*a*b + 2*c*d) / (1-2*b*b - 2*c*c));
     *z = atan((2*b*c + 2*a*d) / (1-2*c*c - 1-2*d*d));
 }
+
