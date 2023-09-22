@@ -16,6 +16,7 @@ OS_STK Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 OS_STK Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 
 double mpu6050_gyro[3] = {0.0,0.0,0.0};
+double mpu6050_accel[3] = {0.0,0.0,0.0};
 
 /**
 * @brief gy-86数据采集
@@ -25,7 +26,9 @@ void TEST_Task_MPU6050_Get_Data(void* arg)
 {
     for(;;)
     {
+        MPU6050_Read_Data();
         MPU6050_Get_Gyroscope(&mpu6050_gyro[0],&mpu6050_gyro[1],&mpu6050_gyro[2]);
+        MPU6050_Get_Accelerometer(&mpu6050_accel[0], &mpu6050_accel[1],&mpu6050_accel[2]);
         OSTimeDlyHMSM(0, 0,0,100);
     }
 }
@@ -53,12 +56,22 @@ void TEST_Task_Print_Euler_Angle(void* arg)
     }
 }
 
+void TEST_Task_Print_Accel(void* arg)
+{
+    for(;;)
+    {
+        printf("p:%-4.2f\n",mpu6050_accel[0]);
+        printf("y:%-4.2f\n",mpu6050_accel[1]);
+        printf("r:%-4.2f\n\n",mpu6050_accel[2]);
+        OSTimeDlyHMSM(0, 0,0,250);
+    }
+}
+
 
 void TEST_Task_MPU6050_Get_Data_Init()
 {
     MPU6050_Init();
     OSTaskCreate(TEST_Task_MPU6050_Get_Data, (void*)0, &Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_MPU6050_GET_DATA_PRIO);
-    //OSTaskCreate(TEST_Task_MPU6050_Print_Data, (void*)0, &Stk_MPU6050_Print_Data[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_MPU6050_GET_PRINT_PRIO);
-    OSTaskCreate(TEST_Task_Count_EulerAngle, (void*)0, &Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_COUNT_EULERANGLE_PRIO);
-    OSTaskCreate(TEST_Task_Print_Euler_Angle, (void*)0, &Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_PRINT_EULERANGLE_PRIO);
+    //OSTaskCreate(TEST_Task_Count_EulerAngle, (void*)0, &Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_COUNT_EULERANGLE_PRIO);
+    OSTaskCreate(TEST_Task_Print_Accel, (void*)0, &Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_PRINT_EULERANGLE_PRIO);
 }
