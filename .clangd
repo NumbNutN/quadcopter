@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: [-isystem/usr/include/newlib, 
+        -isystem/usr/include/newlib/c++/9.2.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits,
+        -isystem/usr/include/newlib/c++/9.2.1]

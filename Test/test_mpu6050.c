@@ -12,7 +12,7 @@
 
 
 OS_STK Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE];
-OS_STK Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
+//OS_STK Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 OS_STK Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 
 double mpu6050_gyro[3] = {0.0,0.0,0.0};
@@ -58,11 +58,14 @@ void TEST_Task_Print_Euler_Angle(void* arg)
 
 void TEST_Task_Print_Accel(void* arg)
 {
+    OS_CPU_SR cpu_sr;
     for(;;)
     {
+        OS_ENTER_CRITICAL();
         printf("p:%-4.2f\n",mpu6050_accel[0]);
         printf("y:%-4.2f\n",mpu6050_accel[1]);
         printf("r:%-4.2f\n\n",mpu6050_accel[2]);
+        OS_EXIT_CRITICAL();
         OSTimeDlyHMSM(0, 0,0,250);
     }
 }

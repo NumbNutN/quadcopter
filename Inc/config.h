@@ -11,6 +11,7 @@
 
 #if TEST_EN > 0u
     #define TEST_I2C_MPU6050_EN    1u
+    #define TEST_CPP_EN             1u
 #endif
 
 #endif
