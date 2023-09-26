@@ -39,6 +39,13 @@ void TEST_Task_Count_EulerAngle(void* arg)
     {
         //使用一阶龙塔图求积分
         Runge_Kutta_1st(cur_quat,mpu6050_gyro,((double)Get_TimeStamp()-_euler_angle_told) / HAL_RCC_GetSysClockFreq());
+        //对求解的四元数进行加速度计矫正 梯度下降逼近
+        for(int i=0;i<3;++i)
+        {
+            MPU6050_Read_Data();
+            MPU6050_Get_Accelerometer(&mpu6050_accel[0], &mpu6050_accel[1],&mpu6050_accel[2]);
+            accelerator_gradient_decent(cur_quat,mpu6050_accel,0.1);
+        }
         OSTimeDlyHMSM(0, 0,0,100);
     }
 }
@@ -72,6 +79,6 @@ void TEST_Task_MPU6050_Get_Data_Init()
 {
     MPU6050_Init();
     OSTaskCreate(TEST_Task_MPU6050_Get_Data, (void*)0, &Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_MPU6050_GET_DATA_PRIO);
-    //OSTaskCreate(TEST_Task_Count_EulerAngle, (void*)0, &Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_COUNT_EULERANGLE_PRIO);
-    OSTaskCreate(TEST_Task_Print_Accel, (void*)0, &Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_PRINT_EULERANGLE_PRIO);
+    OSTaskCreate(TEST_Task_Count_EulerAngle, (void*)0, &Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_COUNT_EULERANGLE_PRIO);
+    OSTaskCreate(TEST_Task_Print_Euler_Angle, (void*)0, &Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_PRINT_EULERANGLE_PRIO);
 }

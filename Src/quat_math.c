@@ -55,6 +55,21 @@ void quat2eulerAngle_zyx(double* quat,double* x,double* y,double* z)
     double d = quat[3];
     *y = -asin(2*b*d-2*a*c);
     *x = atan((2*a*b + 2*c*d) / (1-2*b*b - 2*c*c));
-    *z = atan((2*b*c + 2*a*d) / (1-2*c*c - 1-2*d*d));
+    *z = atan((2*b*c + 2*a*d) / (1-2*c*c - 2*d*d));
 }
 
+void accelerator_gradient_decent(double* quat,double* accel,double step) {
+    double jocabian[4][4] = ACCELERATOR_ERRORS_FUNCTION_JACOBIAN(quat[0],quat[1],quat[2],quat[3]);
+    double errors_function[4][1] = ACCELERATOR_ERRORS_FUNCTION(quat[0],quat[1],quat[2],quat[3],accel[0],accel[1],accel[2]);
+    double gradent[4][1];
+    
+    mul((double*)jocabian, (double*)errors_function, false, (double*)gradent, 4, 4, 1);
+    Quat_Normalization((double*)gradent, (double*)gradent);
+
+    scale((double*)gradent, step, 4, 1);
+    sub(quat, (double*)gradent, quat, 4, 1, 1);
+
+    //四元数归一化
+    Quat_Normalization(quat, quat);
+
+}
