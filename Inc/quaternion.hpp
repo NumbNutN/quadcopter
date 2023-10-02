@@ -7,13 +7,13 @@ using namespace std;
 
 class quaternion{
 
-private:
+public:
+
     double q0;
     double q1;
     double q2;
     double q3;
 
-public:
     quaternion(double q0=1.0f,double q1=0.0f,double q2=0.0f,double q3=0.0f) :q0(q0),q1(q1),q2(q2),q3(q3){
         printf("parameter constructor\n");
     }
@@ -58,6 +58,10 @@ quaternion operator*(const quaternion& a,const quaternion& b) {
         a.q3*b.q0 - a.q2*b.q1 + a.q1*b.q2 + a.q0*b.q3
     );
     printf("multiple\n");
+}
+
+quaternion operator+(double scale,const quaternion& q) {
+    return quaternion(q.q0*scale,q.q1*scale,q.q2*scale,q.q3*scale);
 }
 
 

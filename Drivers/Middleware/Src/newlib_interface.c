@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <reent.h>
+#include "usart.h"
 
 // void putchar(int c){
 //     OLED_ShowChar(0,0,c);
@@ -21,18 +22,19 @@ _write (int file, const void * ptr, size_t len)
 {
     int i;
     char ch;
-    for(i=0;i<len;++i)
-    {
-        OLED_ScreenSwitchCheck();
-        ch = *(char*)ptr;
-        if(ch == '\n')
-            OLED_Newline();
-        else
-        {
-            OLED_Update_Pos();
-            OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)ptr++));
-        }
-    }
+    // for(i=0;i<len;++i)
+    // {
+    //     OLED_ScreenSwitchCheck();
+    //     ch = *(char*)ptr;
+    //     if(ch == '\n')
+    //         OLED_Newline();
+    //     else
+    //     {
+    //         OLED_Update_Pos();
+    //         OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)ptr++));
+    //     }
+    // }
+    HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, 0);
     return len;
 }
 

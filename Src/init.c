@@ -28,5 +28,6 @@ void Test_Task_Init(void){
 }
 
 void Test_Bf_OS(void){
+    TEST_uart();
     TEST_SSD1306_PutChar();
 }
