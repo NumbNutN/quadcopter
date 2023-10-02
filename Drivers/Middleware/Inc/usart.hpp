@@ -35,31 +35,31 @@ private:
         HAL_GPIO_Init(port, &GPIO_InitStruct);
     }
 
-    void _uart_start()
+    inline void _uart_start()
     {
-        HAL_GPIO_WritePin(port, pinTx, GPIO_PIN_RESET);
+        port->BSRR = (uint32_t)pinTx << 16U;
         delay_us(_delay_us);
     }
 
-    void _uart_send(uint8_t byte)
+    inline void _uart_send(uint8_t byte)
     {
         for(int i=0;i<8;++i)
         {
-            HAL_GPIO_WritePin(port, pinTx, GPIO_PinState(byte & 1u));
+            byte & 1u ? port->BSRR = pinTx : port->BSRR = (uint32_t)pinTx << 16U;
             byte = byte >> 1;
             delay_us(_delay_us);
         }
     }
 
-    void _uart_stop(){
-        HAL_GPIO_WritePin(port, pinTx, GPIO_PIN_SET);
+    inline void _uart_stop(){
+        port->BSRR = pinTx;
         delay_us(_delay_us);
         delay_us(_delay_us);
     }
 
 public:
 
-    usart(GPIO_TypeDef * port,uint16_t tx,uint16_t rx,uint32_t baudrate) :port(port),pinTx(tx),pinRx(rx),_delay_ns(1e9 / baudrate),_delay_us(1e6 / baudrate)
+    usart(GPIO_TypeDef * port,uint16_t tx,uint16_t rx,uint32_t baudrate) :port(port),pinTx(tx),pinRx(rx),_delay_ns(1e9 / baudrate),_delay_us(1e6 / baudrate / 2)
     {
         _tx_pin_init(port, tx);
     }
