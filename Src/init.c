@@ -5,6 +5,9 @@
 #include "test_tasks.h"
 
 #include "i2c.h"
+#include "mpu6050.h"
+#include "ssd1306_i2c.h"
+
 
 
 void Task_Init(void){
@@ -19,15 +22,20 @@ void Task_Init(void){
 void Peripherals_Init(void){
 
     I2C_Init((uint32_t)I2C1);
+    SSD1306_Init();
+    OLED_Clean();
 
 }
 
 void Test_Task_Init(void){
     //MPU6050 Read Data
     Test_Task_MPU6050_Get_Data_Init();
+    Test_RK4_Init();
 }
 
 void Test_Bf_OS(void){
-    TEST_uart();
-    TEST_SSD1306_PutChar();
+    test_uart();
+    test_stream();
+    test_quaternion();
+    test_hmc();
 }

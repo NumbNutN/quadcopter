@@ -1,67 +1,97 @@
-#include <stdc++.h>
+#pragma once
+
+#include <iostream>
+#include <vector>
 
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
   
 using namespace std;
 
 class quaternion{
 
+private:
+    
+    //std::vector<double> dat;
+    double dat[4];
+
 public:
 
-    double q0;
-    double q1;
-    double q2;
-    double q3;
-
-    quaternion(double q0=1.0f,double q1=0.0f,double q2=0.0f,double q3=0.0f) :q0(q0),q1(q1),q2(q2),q3(q3){
-        printf("parameter constructor\n");
+    quaternion(double q0=1.0f,double q1=0.0f,double q2=0.0f,double q3=0.0f) :dat({q0,q1,q2,q3}){
+        //cout <<"parameter constructor"<< endl;
     }
 
+    // quaternion(std::initializer_list<double>& list) :dat(list){
+    //     //cout <<"initializer list constructor" << endl;
+    // }
+
     quaternion(const quaternion& quat) {
-        printf("copy constructor\n");
+        memcpy(dat, quat.dat, sizeof(double)*4);
+        //dat = quat.dat;
+        //printf("copy constructor\n");
     }
 
     quaternion(quaternion&& quat) {
-        printf("move constructor\n");
+        memcpy(dat, quat.dat, sizeof(double)*4);
+        //dat = std::vector<double>(std::move(quat.dat));
+        //printf("move constructor\n");
     }
 
     quaternion& normalization() {
-        double len = sqrt(q0*q0+q1*q1+q2*q2+q3*q3);
-        q0 = q0 / len;
-        q1 = q1 / len;
-        q2 = q2 / len;
-        q3 = q3 / len;
+        double len = sqrt(dat[0]*dat[0]+dat[1]*dat[1]+dat[2]*dat[2]+dat[3]*dat[3]);
+        dat[0] = dat[0] / len;
+        dat[1] = dat[1] / len;
+        dat[2] = dat[2] / len;
+        dat[3] = dat[3] / len;
         return *this;
     }
 
     friend quaternion operator+(const quaternion& a,const quaternion& b);
     friend quaternion operator*(const quaternion& a,const quaternion& b);
+    friend quaternion operator*(double scale,const quaternion& q);
+    friend quaternion operator*(int scale, const quaternion &q);
+    friend inline quaternion operator*(long unsigned int scale, const quaternion &q);
+
+    double operator[](size_t index) {
+        return dat[index];
+    }
 
     quaternion& operator=(const quaternion& a) = default;
 
+    quaternion& operator+=(const quaternion& a){
+        dat[0] += a.dat[0];dat[1] += a.dat[1];dat[2] += a.dat[2];dat[3]+=a.dat[3];
+        return *this;
+    }
 };
 
-quaternion operator+(const quaternion& a,const quaternion& b) {
+inline quaternion operator+(const quaternion& a,const quaternion& b) {
 
-    return quaternion(a.q0+b.q0,a.q1+b.q1,a.q2+b.q2+a.q3+b.q3);
-    printf("add\n");
+    return quaternion(a.dat[0]+b.dat[0],a.dat[1]+b.dat[1],a.dat[2]+b.dat[2]+a.dat[3]+b.dat[3]);
+    //printf("add\n");
 }
 
 
-quaternion operator*(const quaternion& a,const quaternion& b) {
+inline quaternion operator*(const quaternion& a,const quaternion& b) {
     
     return quaternion(
-        a.q0*b.q0 - a.q1*b.q1 - a.q2*b.q2 - a.q3*b.q3,
-        a.q1*b.q0 + a.q0*b.q1 - a.q3*b.q2 + a.q2*b.q3,
-        a.q2*b.q0 + a.q3*b.q1 + a.q0*b.q2 - a.q1*b.q3,
-        a.q3*b.q0 - a.q2*b.q1 + a.q1*b.q2 + a.q0*b.q3
+        a.dat[0]*b.dat[0] - a.dat[1]*b.dat[1] - a.dat[2]*b.dat[2] - a.dat[3]*b.dat[3],
+        a.dat[1]*b.dat[0] + a.dat[0]*b.dat[1] - a.dat[3]*b.dat[2] + a.dat[2]*b.dat[3],
+        a.dat[2]*b.dat[0] + a.dat[3]*b.dat[1] + a.dat[0]*b.dat[2] - a.dat[1]*b.dat[3],
+        a.dat[3]*b.dat[0] - a.dat[2]*b.dat[1] + a.dat[1]*b.dat[2] + a.dat[0]*b.dat[3]
     );
-    printf("multiple\n");
+    //printf("multiple\n");
 }
 
-quaternion operator+(double scale,const quaternion& q) {
-    return quaternion(q.q0*scale,q.q1*scale,q.q2*scale,q.q3*scale);
+inline quaternion operator*(double scale,const quaternion& q) {
+    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
 }
 
+inline quaternion operator*(int scale, const quaternion &q){
+    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
+}
 
+inline quaternion operator*(long unsigned int scale, const quaternion &q){
+    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
+}

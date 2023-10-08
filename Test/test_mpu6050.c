@@ -10,9 +10,9 @@
 #include "quat_math.h"
 #include "delay.h"
 
+#if TEST_I2C_MPU6050_EN > 0u
 
 OS_STK Stk_MPU6050_Get_Data[TASK_MPU6050_GET_DATA_STACK_SIZE];
-//OS_STK Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 OS_STK Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE];
 
 double mpu6050_gyro[3] = {0.0,0.0,0.0};
@@ -78,3 +78,5 @@ void TEST_Task_MPU6050_Get_Data_Init()
     //OSTaskCreate(TEST_Task_Count_EulerAngle, (void*)0, &Stk_Count_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_COUNT_EULERANGLE_PRIO);
     OSTaskCreate(TEST_Task_Print_Accel, (void*)0, &Stk_Print_EulerAngle[TASK_MPU6050_GET_DATA_STACK_SIZE - 1], TASK_PRINT_EULERANGLE_PRIO);
 }
+
+#endif

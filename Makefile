@@ -87,7 +87,8 @@ $(wildcard EmbeddedLapack/EmbeddedLapack/src/Lapack/Scr/*.c) \
 $(wildcard /mnt/d/Coding/stm32/quadcopter/EmbeddedLapack/EmbeddedLapack/src/LinearAlgebra/*.c)
 
 CPP_SOURCES = \
-Test/test_cpp.cpp
+Test/test_cpp.cpp \
+Src/runge_kutta.cpp
 
 
 # ASM sources

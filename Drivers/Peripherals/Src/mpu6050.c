@@ -62,6 +62,11 @@ void MPU6050_Init()
     uint8_t pwr_mgmt2[2] = {MPU6050_POWER_MANAGER_2,0x00};
     I2C_Write((uint32_t)I2C1,MPU6050_ADDRESS_W,pwr_mgmt2,2);
 
+    uint8_t user_mode[2] = {0x6A,0x00};
+    I2C_Write((uint32_t)I2C1,MPU6050_ADDRESS_W,user_mode,2);
+    uint8_t user_mode2[2] = {0x37,0x02};
+    I2C_Write((uint32_t)I2C1,MPU6050_ADDRESS_W,user_mode2,2);
+
     //定义采集数据指针
     _accelerometer_data_ptr = &MPU6050_Read_Buffer[0];
     _gyroscope_data_ptr = &MPU6050_Read_Buffer[8];

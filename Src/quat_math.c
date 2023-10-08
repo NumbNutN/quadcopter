@@ -6,11 +6,11 @@
 #include "delay.h"
 
 double cur_quat[4] = {1.0,0,0,0};
-uint64_t _euler_angle_told;
+uint64_t _euler_angle_told_c;
 
 void _start_count_euler_angle()
 {
-    _euler_angle_told = Get_TimeStamp();
+    _euler_angle_told_c = Get_TimeStamp();
 }
 
 void quat2mat(double* mat,double* quat)
