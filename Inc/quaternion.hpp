@@ -16,6 +16,7 @@ private:
     
     //std::vector<double> dat;
     double dat[4];
+    std::vector<double> vec;
 
 public:
 
@@ -52,9 +53,9 @@ public:
     friend quaternion operator*(const quaternion& a,const quaternion& b);
     friend quaternion operator*(double scale,const quaternion& q);
     friend quaternion operator*(int scale, const quaternion &q);
-    friend inline quaternion operator*(long unsigned int scale, const quaternion &q);
+    friend quaternion operator*(long unsigned int scale, const quaternion &q);
 
-    double operator[](size_t index) {
+    double operator[](size_t index) const{
         return dat[index];
     }
 
@@ -94,4 +95,9 @@ inline quaternion operator*(int scale, const quaternion &q){
 
 inline quaternion operator*(long unsigned int scale, const quaternion &q){
     return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
+}
+
+inline ostream& operator<<(ostream& out,const quaternion& q) {
+    out << q[0] << " " << q[1] << " " << q[2] << " " << q[3];
+    return out;
 }

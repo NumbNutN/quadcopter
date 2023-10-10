@@ -1,3 +1,5 @@
+#pragma once
+
 #define MPU6050_CONFIG 0x1A //低通滤波器 和 external Frame Synchronization (FSYNC)
 #define MPU6050_SMPRT_DIV 0x19 //分频采样
 #define MPU6050_GYROSCOPE_CONFIG 0x1B //陀螺仪自检和量程
