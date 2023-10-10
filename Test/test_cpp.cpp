@@ -39,3 +39,4 @@ void TEST_quaternion()
 // }
 
 #include "test_attitude_calculate.cpp"
+#include "test_print_accel.cpp"

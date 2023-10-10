@@ -46,6 +46,12 @@ extern void doNothing(void);
     #define test_hmc doNothing
 #endif
 
+#if TEST_PRINT_ACCEL_EN > 0u
+    #define Test_Print_Accel_Init TEST_Print_Accel_Init
+#else
+    #define Test_Print_Accel_Init doNothing
+#endif
+
 /**
 * @brief gy-86数据采集
 */
@@ -62,3 +68,5 @@ extern void test_quaternion(void);
 extern void test_hmc(void);
 
 extern void TEST_RK4_Init(void);
+
+extern void TEST_Print_Accel_Init(void);
