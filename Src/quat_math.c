@@ -55,6 +55,6 @@ void quat2eulerAngle_zyx(double* quat,double* x,double* y,double* z)
     double d = quat[3];
     *y = -asin(2*b*d-2*a*c);
     *x = atan((2*a*b + 2*c*d) / (1-2*b*b - 2*c*c));
-    *z = atan((2*b*c + 2*a*d) / (1-2*c*c - 1-2*d*d));
+    *z = atan((2*b*c + 2*a*d) / (1-2*c*c - 2*d*d));
 }
 

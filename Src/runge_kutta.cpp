@@ -12,3 +12,8 @@ quaternion RK4([[maybe_unused]]double t,[[maybe_unused]]const quaternion& q,doub
     quaternion final = q + tmp;
     return final;
 }
+
+quaternion RK1([[maybe_unused]]double t,[[maybe_unused]]const quaternion& q,double delta,const f_t &f)
+{
+    return q + f(t,q) * delta;
+}

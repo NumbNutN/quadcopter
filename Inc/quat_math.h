@@ -25,7 +25,7 @@
 
 
 extern double cur_quat[4];
-extern uint64_t __euler_angle_told;
+extern uint64_t _euler_angle_told_c;
 
 void quat2mat(double* mat,double* quat);
 void Runge_Kutta_1st(double* quat,double* gyro,float deltaT);

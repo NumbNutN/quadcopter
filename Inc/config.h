@@ -11,8 +11,8 @@
 
 #if TEST_EN > 0u
     #define TEST_I2C_MPU6050_EN    0u
-    #define TEST_RK4_EN         0u
-    #define TEST_PRINT_ACCEL_EN         1u
+    #define TEST_RK4_EN         1u
+    #define TEST_PRINT_ACCEL_EN         0u
 
     #define TEST_UART_EN        0u
     #define TEST_COUT_EN        0u
