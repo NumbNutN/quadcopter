@@ -88,7 +88,8 @@ $(wildcard /mnt/d/Coding/stm32/quadcopter/EmbeddedLapack/EmbeddedLapack/src/Line
 
 CPP_SOURCES = \
 Test/test_cpp.cpp \
-Src/runge_kutta.cpp
+Src/runge_kutta.cpp \
+Src/quaternion_math.cpp
 
 
 # ASM sources
