@@ -22,7 +22,7 @@ void TEST_Task_Print_Accel(void* arg){
         mpu6050_dev.update();
         quaternion accel = mpu6050_dev.get_accelero();
         // printf("%lf %lf\n",accel[0],accel[1]);
-        cout << accel << endl;
+        cout << accel.normalization() << endl;
         OSTimeDlyHMSM(0, 0, 0, 500);
     }
 }

@@ -16,7 +16,6 @@ private:
     
     //std::vector<double> dat;
     double dat[4];
-    std::vector<double> vec;
 
 public:
 
@@ -30,13 +29,13 @@ public:
 
     quaternion(const quaternion& quat) {
         memcpy(dat, quat.dat, sizeof(double)*4);
-        //dat = quat.dat;
+        //dat = quat;
         //printf("copy constructor\n");
     }
 
     quaternion(quaternion&& quat) {
         memcpy(dat, quat.dat, sizeof(double)*4);
-        //dat = std::vector<double>(std::move(quat.dat));
+        //dat = std::vector<double>(std::move(quat));
         //printf("move constructor\n");
     }
 
@@ -49,11 +48,19 @@ public:
         return *this;
     }
 
+    double length() {
+        return sqrt(dat[0]*dat[0]+dat[1]*dat[1]+dat[2]*dat[2]+dat[3]*dat[3]);
+    }
+
     friend quaternion operator+(const quaternion& a,const quaternion& b);
     friend quaternion operator*(const quaternion& a,const quaternion& b);
-    friend quaternion operator*(double scale,const quaternion& q);
-    friend quaternion operator*(int scale, const quaternion &q);
-    friend quaternion operator*(long unsigned int scale, const quaternion &q);
+    friend quaternion operator-(const quaternion& a,const quaternion& b);
+    
+    template <typename T>
+    friend quaternion operator*(T scale, const quaternion &q);
+
+    template <typename T>
+    friend quaternion operator/(const quaternion &q,T scale);
 
     double operator[](size_t index) const{
         return dat[index];
@@ -62,39 +69,39 @@ public:
     quaternion& operator=(const quaternion& a) = default;
 
     quaternion& operator+=(const quaternion& a){
-        dat[0] += a.dat[0];dat[1] += a.dat[1];dat[2] += a.dat[2];dat[3]+=a.dat[3];
+        dat[0] += a[0];dat[1] += a[1];dat[2] += a[2];dat[3]+=a[3];
         return *this;
     }
 };
 
 inline quaternion operator+(const quaternion& a,const quaternion& b) {
 
-    return quaternion(a.dat[0]+b.dat[0],a.dat[1]+b.dat[1],a.dat[2]+b.dat[2]+a.dat[3]+b.dat[3]);
-    //printf("add\n");
+    return quaternion(a[0]+b[0],a[1]+b[1],a[2]+b[2],a[3]+b[3]);
 }
 
+inline quaternion operator-(const quaternion& a,const quaternion& b) {
+
+    return quaternion(a[0]-b[0],a[1]-b[1],a[2]-b[2],a[3]-b[3]);
+}
 
 inline quaternion operator*(const quaternion& a,const quaternion& b) {
     
     return quaternion(
-        a.dat[0]*b.dat[0] - a.dat[1]*b.dat[1] - a.dat[2]*b.dat[2] - a.dat[3]*b.dat[3],
-        a.dat[1]*b.dat[0] + a.dat[0]*b.dat[1] - a.dat[3]*b.dat[2] + a.dat[2]*b.dat[3],
-        a.dat[2]*b.dat[0] + a.dat[3]*b.dat[1] + a.dat[0]*b.dat[2] - a.dat[1]*b.dat[3],
-        a.dat[3]*b.dat[0] - a.dat[2]*b.dat[1] + a.dat[1]*b.dat[2] + a.dat[0]*b.dat[3]
+        a[0]*b[0] - a[1]*b[1] - a[2]*b[2] - a[3]*b[3],
+        a[1]*b[0] + a[0]*b[1] - a[3]*b[2] + a[2]*b[3],
+        a[2]*b[0] + a[3]*b[1] + a[0]*b[2] - a[1]*b[3],
+        a[3]*b[0] - a[2]*b[1] + a[1]*b[2] + a[0]*b[3]
     );
-    //printf("multiple\n");
 }
 
-inline quaternion operator*(double scale,const quaternion& q) {
-    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
+template <typename T>
+quaternion operator*(T scale, const quaternion &q) {
+    return quaternion(q[0]*scale,q[1]*scale,q[2]*scale,q[3]*scale);
 }
 
-inline quaternion operator*(int scale, const quaternion &q){
-    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
-}
-
-inline quaternion operator*(long unsigned int scale, const quaternion &q){
-    return quaternion(q.dat[0]*scale,q.dat[1]*scale,q.dat[2]*scale,q.dat[3]*scale);
+template <typename T>
+quaternion operator/(const quaternion &q,T scale) {
+    return quaternion(q[0]/scale,q[1]/scale,q[2]/scale,q[3]/scale);
 }
 
 inline ostream& operator<<(ostream& out,const quaternion& q) {
