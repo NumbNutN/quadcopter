@@ -161,7 +161,7 @@ C_INCLUDES =  \
 -ITest \
 -IEmbeddedLapack/EmbeddedLapack/src \
 -I/usr/include/newlib \
--I/usr/include/newlib/c++/9.2.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits \
+-I/usr/include/newlib/c++/9.2.1/arm-none-eabi/thumb/v7e-m+fp/hard \
 -I/usr/include/newlib/c++/9.2.1
 
 
