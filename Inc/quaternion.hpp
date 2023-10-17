@@ -52,6 +52,19 @@ public:
         return sqrt(dat[0]*dat[0]+dat[1]*dat[1]+dat[2]*dat[2]+dat[3]*dat[3]);
     }
 
+    double getTheta() {
+        return 2*acos(dat[0]);
+    }
+
+    quaternion getAxis() {
+        double sinTheta = sin(acos(dat[0]));
+        return quaternion{0,dat[1] / sinTheta,dat[2] / sinTheta,dat[3] / sinTheta};
+    }
+
+    quaternion conjugate() const{
+        return quaternion{dat[0],-dat[1],-dat[2],-dat[3]};
+    }
+
     friend quaternion operator+(const quaternion& a,const quaternion& b);
     friend quaternion operator*(const quaternion& a,const quaternion& b);
     friend quaternion operator-(const quaternion& a,const quaternion& b);
