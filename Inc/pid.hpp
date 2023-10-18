@@ -1,4 +1,3 @@
-#include <utility>
 
 // class pid{
 
@@ -49,33 +48,34 @@ private:
     float _cur_var;
     float _target;
     float _accumated_error;
+    float _output;
 
     bool _tar_is_set = false;
-
+    using value_type = float;
     using f_t = float(*)();
     using callback_t = void(*)(float y);
     using f_item = float(*)(pid*);
 
-    f_t get_cur_pair;
+    f_t get_cur_val;
     callback_t callback;
     f_item get_differentiate;
 
 
 public:
     pid(float kp,float ki,float kd,
-        f_t get_cur_pair,
+        f_t get_cur_val,
         callback_t callback,
         f_item get_differentiate = [](pid* obj)->float{return obj->getVarDelta();}) :kp(kp),ki(ki),kd(kd),
-                get_cur_pair(get_cur_pair),
+                get_cur_val(get_cur_val),
                 callback(callback),
                 get_differentiate(get_differentiate){}
 
     void run(){
         if(_tar_is_set){
-            _cur_var = get_cur_pair();
+            _cur_var = get_cur_val();
             _accumated_error += _cur_var;
-            float out = kp* (_target - _cur_var) + ki*_accumated_error + kd*get_differentiate(this);
-            callback(out);
+            _output = kp* (_target - _cur_var) + ki*_accumated_error + kd*get_differentiate(this);
+            callback(_output);
         }
     }
 
@@ -93,12 +93,16 @@ public:
         this->kd = kd;
     }
 
-    float getCurError(){
+    float getCurError() const {
         return _target - _cur_var;
     }
 
-    float getVarDelta(){
+    float getVarDelta() const {
         return _cur_var - _last_var;
+    }
+
+    float getOutput() const {
+        return _output;
     }
 
 };

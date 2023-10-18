@@ -3,9 +3,14 @@
 #include "hmc_5583l.hpp"
 
 #include <iostream>
-#include "stdc++.h"
+
 
 using namespace std;
+
+#include "test_attitude_calculate.cpp"
+#include "test_print_accel.cpp"
+#include "test_pid.cpp"
+#include "test_pid 3.cpp"
 
 void TEST_uart()
 {
@@ -16,7 +21,7 @@ void TEST_uart()
 
 void TEST_stream()
 {
-    // cout << "hello" << endl;
+    cout << "hello" << endl;
 }
 
 void TEST_quaternion()
@@ -37,7 +42,3 @@ void TEST_quaternion()
 //     }
 
 // }
-
-#include "test_attitude_calculate.cpp"
-#include "test_print_accel.cpp"
-#include "test_pid.cpp"

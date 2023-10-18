@@ -32,6 +32,7 @@ void Test_Task_Init(void){
     Test_Task_MPU6050_Get_Data_Init();
     Test_RK4_Init();
     Test_Print_Accel_Init();
+    Test_PID_Init();
 }
 
 void Test_Bf_OS(void){

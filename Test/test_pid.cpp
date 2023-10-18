@@ -5,10 +5,15 @@
 #define TASK_PID_INTERNAL_PRIO 11u
 #define TASK_PID_EXTERNAL_PRIO 12u
 
+#include <iostream>
+
 #include "pid.hpp"
 #include "quaternion.hpp"
 
 #include "os.h"
+#include <math.h>
+
+using namespace std;
 
 extern quaternion last_gyro;
 extern quaternion cur_gyro;
@@ -19,7 +24,7 @@ OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
 float get_Theta(){
-    return cur_gyro.getTheta();
+    return last_attitude.getTheta();
 }
 
 float get_Omega(){
@@ -29,18 +34,20 @@ float get_Omega(){
     return cur_gyro.length();
 }
 
-void set_pwm(float theta){
-
+float get_Omega(pid* obj){
+    return cur_gyro.length();
 }
 
-float get_gyro() {
+static void set_pwm(float theta){
 
 }
 
 //内环PID p i d 获取当前角速度 计算出当前角加速度后的回调 获取当前导数（角加速度）
-pid ipid_controller(0.5,0.5,0.5,get_Omega,set_pwm);
+pid ipid_controller(0.5,0.2,0.2,
+                    get_Omega,
+                    set_pwm);
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
-pid epid_controller(0.5,0.5,0.5,
+pid epid_controller(0.5,0,0,
                     get_Theta,
                     [](float tar)->void{ipid_controller.setTarget(tar);},
                     get_Omega);
@@ -52,8 +59,11 @@ void TEST_PID_EXTERNAL(void* arg){
     {
         if(abs(epid_controller.getCurError()) < threshold)
             //获取当前的等效偏移角
-            epid_controller.setTarget(-last_attitude.getTheta());
+            epid_controller.setTarget(0);
         epid_controller.run();
+
+        //绘制当前角速度期望值
+        cout << epid_controller.getOutput() << endl;
         OSTimeDlyHMSM(0, 0, 0, 200);
     }
 }

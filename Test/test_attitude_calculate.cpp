@@ -91,7 +91,7 @@ void TEST_Task_RK1_Attitude_Calculate(void* arg){
                             quaternion_derivative);
         last_attitude.normalization();
 
-        //梯度下降获取加速度计姿态
+        //高斯牛顿迭代获取加速度计姿态
         cur_accel = mpu6050_dev.get_accelero();
         // for(int i=0;i<2;++i)
         //     last_attitude = gradient_decent(last_attitude,error_function_gradient,0.5);
@@ -108,7 +108,6 @@ void TEST_Task_RK1_Attitude_Calculate(void* arg){
 void TEST_Task_Attitude(void* arg){
     for(;;)
     {
-        //cout << attitude_from_accel << endl;
         print_quaternion2EulerAngle(last_attitude);
         OSTimeDlyHMSM(0, 0, 0, 500);
     }
@@ -117,7 +116,9 @@ void TEST_Task_Attitude(void* arg){
 void TEST_RK4_Init()
 {
     OSTaskCreate(TEST_Task_RK1_Attitude_Calculate, (void*)0, &Stk_RK4[1023], TASK_RK4_PRIO);
-    OSTaskCreate(TEST_Task_Attitude, NULL, &Stk_Rk4_Print[1023], TASK_RK4_PRINT_PRIO);
+    //OSTaskCreate(TEST_Task_Attitude, NULL, &Stk_Rk4_Print[1023], TASK_RK4_PRINT_PRIO);
 }
+
+
 
 #endif      

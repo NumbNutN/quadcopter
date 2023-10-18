@@ -10,3 +10,9 @@ quaternion RK4([[maybe_unused]]double t,[[maybe_unused]]const quaternion& q,doub
 quaternion RK1([[maybe_unused]]double t,[[maybe_unused]]const quaternion& q,double delta,const f_t &f);
 
 void print_quaternion2EulerAngle(quaternion& q);
+
+float quat_get_Roll(const quaternion& q);
+
+float quat_get_Pitch(const quaternion& q);
+
+float quat_get_Yaw(const quaternion& q);
