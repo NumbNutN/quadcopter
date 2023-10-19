@@ -11,6 +11,7 @@ using namespace std;
 #include "test_print_accel.cpp"
 #include "test_pid.cpp"
 #include "test_pid 3.cpp"
+#include "test_motor.cpp"
 
 void TEST_uart()
 {

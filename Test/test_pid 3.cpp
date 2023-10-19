@@ -24,15 +24,26 @@ extern quaternion last_attitude;
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
+extern float motorDutyList[4];
+extern float motorOmegaList[4];
+
+extern float motorOmegaSquareDeltaList[4];
+
+const float expK = 0.5;
+
 void pitch_set_pwm(float alpha){
-
+    // motorOmegaList[0] = -expK*sqrt(alpha);
+    // motorOmegaList[3] = expK*sqrt(alpha);
+    motorOmegaSquareDeltaList[0] = -expK*alpha;
+    motorOmegaSquareDeltaList[3] = expK*alpha;
 }
 
-void roll_set_pwm(float beta){
-
+void roll_set_pwm(float alpha){
+    motorOmegaSquareDeltaList[1] = -expK*alpha;
+    motorOmegaSquareDeltaList[2] = expK*alpha;
 }
 
-void gama_set_pwm(float beta){
+void yaw_set_pwm(float beta){
 
 }
 
@@ -52,7 +63,7 @@ pid ipid_roll_controller(0.5,0.2,0.1,
 
 pid ipid_yaw_controller(0.5,0.2,0.1,
                         []()->float{return cur_gyro[2];},
-                        gama_set_pwm);
+                        yaw_set_pwm);
 
 pid epid_pitch_controller(0.5,0,0,
                     []() -> float{return quat_get_Pitch(last_attitude);},
@@ -87,7 +98,7 @@ void TEST_PID_EXTERNAL(void* arg){
         epid_run(epid_roll_controller);
         epid_run(epid_yaw_controller);
         //绘制当前角速度期望值
-        cout << epid_pitch_controller.getOutput() << endl;
+        //cout << epid_pitch_controller.getOutput() << endl;
         OSTimeDlyHMSM(0, 0, 0, 200);
     }
 }

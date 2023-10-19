@@ -58,6 +58,12 @@ extern void doNothing(void);
     #define Test_PID_Init doNothing
 #endif
 
+#if TEST_MOTOR_EN > 0u
+    #define Test_Motor_Init TEST_Motor_Init
+#else
+    #define Test_Motor_Init doNothing
+#endif
+
 /**
 * @brief gy-86数据采集
 */
@@ -78,3 +84,5 @@ extern void TEST_RK4_Init(void);
 extern void TEST_Print_Accel_Init(void);
 
 extern void TEST_PID_Init(void);
+
+extern void TEST_Motor_Init(void);
