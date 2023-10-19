@@ -2,8 +2,8 @@
 
 #if TEST_PID3_EN > 0u
 
-#define TASK_PID_INTERNAL_PRIO 11u
-#define TASK_PID_EXTERNAL_PRIO 12u
+#define TASK_PID_INTERNAL_PRIO 20u
+#define TASK_PID_EXTERNAL_PRIO 21u
 
 #include <iostream>
 
@@ -11,6 +11,8 @@
 #include "quaternion.hpp"
 
 #include "myMath.hpp"
+#include "motor.hpp"
+
 #include "os.h"
 #include <math.h>
 
@@ -24,23 +26,21 @@ extern quaternion last_attitude;
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
-extern float motorDutyList[4];
-extern float motorOmegaList[4];
 
-extern float motorOmegaSquareDeltaList[4];
+extern motor* motorObjList[4];
 
-const float expK = 0.5;
+const float expK = 0.01;
+float omega_g = 802.04859078;
 
 void pitch_set_pwm(float alpha){
-    // motorOmegaList[0] = -expK*sqrt(alpha);
-    // motorOmegaList[3] = expK*sqrt(alpha);
-    motorOmegaSquareDeltaList[0] = -expK*alpha;
-    motorOmegaSquareDeltaList[3] = expK*alpha;
+    motorObjList[0]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
+    motorObjList[3]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
+
 }
 
 void roll_set_pwm(float alpha){
-    motorOmegaSquareDeltaList[1] = -expK*alpha;
-    motorOmegaSquareDeltaList[2] = expK*alpha;
+    motorObjList[1]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
+    motorObjList[2]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
 }
 
 void yaw_set_pwm(float beta){

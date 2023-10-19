@@ -1,3 +1,5 @@
+#pragma once
+
 #include "stm32f4xx.h"
 #include "tim.h"
 
@@ -6,39 +8,37 @@
 class motor{
 
 private:
-    GPIO_TypeDef * port;
-    uint16_t pin;
-    TIM_TypeDef * timer;
+
 	TIM_HandleTypeDef* htim;
 	uint32_t channel;
+	float _dutyCycle = 0.05f;  /* danger */
 
 public:
-    // motor(GPIO_TypeDef * port,uint16_t pin,TIM_TypeDef * timer) :port(port),pin(pin),timer(timer) {
-	// 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-    // };
 
 	motor(TIM_HandleTypeDef* htim,uint32_t channel) :htim(htim),channel(channel){
 		
 		//设定motor最高阈值
-		setDuty(0.1);
+		setDuty(0.1);updateDuty();
 		HAL_TIM_PWM_Start(htim, channel);
 		OSTimeDlyHMSM(0, 0, 3, 0);
 
-		//设定最高阈值
-		setDuty(0.05);
+		//设定最低阈值
+		setDuty(0.05);updateDuty();
 		OSTimeDlyHMSM(0, 0, 3, 0);
-
-		//回到最低阈值
-		setDuty(0.08);
 
 	}
 
-	void setDuty(float dutyRate){
-		__HAL_TIM_SET_COMPARE(htim,channel,dutyRate*htim->Instance->ARR);
+	void setDuty(float dutyCycle){
+		if(dutyCycle > 0.08) dutyCycle = 0.08;
+		_dutyCycle = dutyCycle;
+	}
+
+	void updateDuty(){
+		__HAL_TIM_SET_COMPARE(htim,channel,_dutyCycle*htim->Instance->ARR);
 	}
 
 	void setAngularVehicle(float omega){
-		setDuty(8.607e-5 * omega + 0.05);
+		setDuty(4.30148e-5 * omega + 0.05);
 	}
 
 };
