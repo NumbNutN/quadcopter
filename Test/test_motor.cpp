@@ -5,10 +5,12 @@
 #include "motor.hpp"
 #include "os.h"
 
-OS_STK Stk_Motor1Init[256];
-OS_STK Stk_Motor2Init[256];
-OS_STK Stk_Motor3Init[256];
-OS_STK Stk_Motor4Init[256];
+#include <iostream>
+
+OS_STK Stk_Motor1Init[512];
+OS_STK Stk_Motor2Init[512];
+OS_STK Stk_Motor3Init[512];
+OS_STK Stk_Motor4Init[512];
 
 #define TASK_MOTOR1_PRIO 14u
 #define TASK_MOTOR2_PRIO 15u
@@ -17,32 +19,46 @@ OS_STK Stk_Motor4Init[256];
 
 motor* motorObjList[4];
 
+using namespace std;
+
 
 void TEST_Task_Motor(void* channel){
     float duty = 0.06;
     motor m(&htim3,(uint32_t)channel);
-    if((uint32_t)channel == TIM_CHANNEL_1)
+    if((uint32_t)channel == TIM_CHANNEL_1){
         motorObjList[0] = &m;
-    else if ((uint32_t)channel == TIM_CHANNEL_2)
+        m.setLabel('a');
+    }
+    else if ((uint32_t)channel == TIM_CHANNEL_2){
         motorObjList[1] = &m;
-    else if ((uint32_t)channel == TIM_CHANNEL_3)
+        m.setLabel('b');
+    }
+    else if ((uint32_t)channel == TIM_CHANNEL_3){
         motorObjList[2] = &m;
-    else
+        m.setLabel('c');
+    }
+    else{
         motorObjList[3] = &m;
+        m.setLabel('d');
+    }
+
     for(;;){
         // duty += 0.001;
         // m.setDuty(duty);
+        // if(m.getLabel() == 'a')
+        //     cout <<m.get_dutyCycle() << endl;
         m.updateDuty();
-        OSTimeDlyHMSM(0, 0, 5, 0);
+        OSTimeDlyHMSM(0, 0, 0, 200);
     }
 }
 
 void TEST_Motor_Init()
 {
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_1, &Stk_Motor1Init[255], TASK_MOTOR1_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_2, &Stk_Motor2Init[255], TASK_MOTOR2_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_3, &Stk_Motor3Init[255], TASK_MOTOR3_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_4, &Stk_Motor4Init[255], TASK_MOTOR4_PRIO);
+
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_1, &Stk_Motor1Init[511], TASK_MOTOR1_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_2, &Stk_Motor2Init[511], TASK_MOTOR2_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_3, &Stk_Motor3Init[511], TASK_MOTOR3_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_4, &Stk_Motor4Init[511], TASK_MOTOR4_PRIO);
 }
 
 #endif

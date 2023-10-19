@@ -2,8 +2,10 @@
 
 #if TEST_PID3_EN > 0u
 
-#define TASK_PID_INTERNAL_PRIO 20u
-#define TASK_PID_EXTERNAL_PRIO 21u
+#define TASK_PID_PITCH_EXTERNAL_PRIO 20u
+#define TASK_PID_ROLL_EXTERNAL_PRIO 21u
+#define TASK_PID_PITCH_INTERNAL_PRIO 22u
+#define TASK_PID_ROLL_INTERNAL_PRIO 23u
 
 #include <iostream>
 
@@ -29,17 +31,21 @@ OS_STK Stk_PID_Exteral[1024];
 
 extern motor* motorObjList[4];
 
-const float expK = 0.01;
-float omega_g = 802.04859078;
+const float expK = 10000000;
+float omega_g = 441.708435;
 
 void pitch_set_pwm(float alpha){
-    motorObjList[0]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
-    motorObjList[3]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
+    // motorObjList[0]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
+    // motorObjList[3]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
+    motorObjList[0]->setDuty(0.069 - 0.05*alpha);
+    motorObjList[3]->setDuty(0.069 + 0.05*alpha);
 }
 
 void roll_set_pwm(float alpha){
-    motorObjList[1]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
-    motorObjList[2]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
+    // motorObjList[1]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
+    // motorObjList[2]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
+    motorObjList[1]->setDuty(0.069 - 0.05*alpha);
+    motorObjList[2]->setDuty(0.069 + 0.05*alpha);
 }
 
 void yaw_set_pwm(float beta){
@@ -65,25 +71,18 @@ pid ipid_yaw_controller(0.5,0.2,0.1,
 pid epid_pitch_controller(0.5,0,0,
                     []() -> float{return quat_get_Pitch(last_attitude);},
                     [](float tar)->void{ipid_pitch_controller.setTarget(tar);},
-                    [](pid*)->float{return cur_gyro[0];});
+                    []()->float{return cur_gyro[0];});
 
 pid epid_roll_controller(0.5,0,0,
                     []() -> float{return quat_get_Roll(last_attitude);},
                     [](float tar)->void{ipid_roll_controller.setTarget(tar);},
-                    [](pid*)->float{return cur_gyro[1];});
+                    []()->float{return cur_gyro[1];});
 
 pid epid_yaw_controller(0.5,0,0,
                     []() -> float{return quat_get_Yaw(last_attitude);},
                     [](float tar)->void{ipid_yaw_controller.setTarget(tar);},
-                    [](pid*)->float{return cur_gyro[2];});
+                    []()->float{return cur_gyro[2];});
 
-void epid_run(pid& controller){
-    float threshold = 0.05;
-    if(abs(controller.getCurError()) > threshold)
-    //获取当前的等效偏移角
-            controller.setTarget(0);
-    controller.run();
-}
 
 OS_EVENT* pitch_internal_get_ref;
 OS_EVENT* yaw_internal_get_ref;
@@ -92,45 +91,44 @@ OS_EVENT* roll_internal_get_ref;
 #define THRESHOLE 0.02
 
 void TEST_PID_EXTERNAL(void* arg){
-    epid_pitch_controller.setTarget(0);
-    epid_roll_controller.setTarget(0);
-    epid_yaw_controller.setTarget(0);
 
-    pitch_internal_get_ref = OSSemCreate(1);
-    yaw_internal_get_ref = OSSemCreate(1);
-    roll_internal_get_ref = OSSemCreate(1);
-
+    pid* controller = (pid*)arg;
+    controller->setTarget(0);
+    // OS_EVENT* sem = OSSemCreate(1);
+    // INT8U err;
     for(;;)
     {
-        if(OSSemAccept(pitch_internal_get_ref))
-            epid_run(epid_pitch_controller);
-        if(OSSemAccept(roll_internal_get_ref))
-            epid_run(epid_roll_controller);
-        if(OSSemAccept(yaw_internal_get_ref))
-            epid_run(epid_yaw_controller);
-        //绘制当前角速度期望值
-        //cout << epid_pitch_controller.getOutput() << endl;
+        //OSSemPend(sem,0,&err);
+        controller->run();
+        // cout << controller->getLabel() << ' '<< controller->getOutput() << endl;
         OSTimeDlyHMSM(0, 0, 0, 200);
     }
 }
 
 void TEST_PID_INTERNAL(void* arg){
+
+    pid* controller = (pid*)arg;
     for(;;)
     {
-        ipid_yaw_controller.run();
-        if(abs(ipid_yaw_controller.getCurError()) < THRESHOLE) OSSemPost(yaw_internal_get_ref);
-        ipid_pitch_controller.run();
-        if(abs(ipid_pitch_controller.getCurError()) < THRESHOLE)  OSSemPost(pitch_internal_get_ref);
-        ipid_roll_controller.run();
-        if(abs(ipid_roll_controller.getCurError()) < THRESHOLE)  OSSemPost(roll_internal_get_ref);
-        OSTimeDlyHMSM(0, 0, 0, 50);
+        controller->run();
+        // if(abs(controller->getCurError()) < THRESHOLE)
+        //     OSSemPost();
+        // if(controller->getLabel() == 'r')
+        //     cout << controller->getOutput() << endl;
+        OSTimeDlyHMSM(0, 0, 0, 20);
     }
 }
 
 void TEST_PID_Init()
 {
-    OSTaskCreate(TEST_PID_INTERNAL, (void*)0, &Stk_PID_Interal[1023], TASK_PID_INTERNAL_PRIO);
-    OSTaskCreate(TEST_PID_EXTERNAL, NULL, &Stk_PID_Exteral[1023], TASK_PID_EXTERNAL_PRIO);
+    ipid_pitch_controller.setLabel('p');
+    ipid_roll_controller.setLabel('r');
+    epid_pitch_controller.setLabel('P');
+    epid_roll_controller.setLabel('R');
+    OSTaskCreate(TEST_PID_INTERNAL, &ipid_pitch_controller, &Stk_PID_Interal[1023], TASK_PID_PITCH_INTERNAL_PRIO);
+    OSTaskCreate(TEST_PID_INTERNAL, &ipid_roll_controller, &Stk_PID_Interal[511], TASK_PID_ROLL_INTERNAL_PRIO);
+    OSTaskCreate(TEST_PID_EXTERNAL, &epid_pitch_controller, &Stk_PID_Exteral[1023], TASK_PID_PITCH_EXTERNAL_PRIO);
+    OSTaskCreate(TEST_PID_EXTERNAL, &epid_roll_controller, &Stk_PID_Exteral[511], TASK_PID_ROLL_EXTERNAL_PRIO);
 }
 
 #endif

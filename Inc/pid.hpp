@@ -1,108 +1,78 @@
+#pragma once
 
-// class pid{
-
-// private:
-//     float kp,ki,kd;
-
-//     float _last_var = 0;
-//     float _target;
-//     float _accumated_error;
-//     std::pair<float,float> _cur_pair;
-
-//     using f_t = std::pair<float,float>(*)(void);
-//     using callback_t = void(*)(float y);
-//     using f_item = float(*)();
-
-//     f_t get_cur_pair;
-//     callback_t callback;
-//     f_item get_differentiate = []()->float{return _cur_pair.first - _last_var};
-
-
-// public:
-//     pid(float kp,float ki,float kd,f_t get_cur_pair,callback_t callback,f_item get_differentiate) :kp(kp),ki(ki),kd(kd),
-//                 get_cur_pair(get_cur_pair),
-//                 callback(callback),
-//                 get_differentiate(get_differentiate){}
-
-//     void run(){
-//         _cur_pair = get_cur_pair();
-//         _accumated_error += _cur_pair.second;
-//         float out = kp* (_target - _cur_pair.second) + ki*_accumated_error + kd*get_differentiate();
-//         _last_var = _cur_pair.first;
-//     }
-
-//     void setTarget(float target){
-//         _target = target;
-//         _accumated_error = 0;
-//         _last_var = 0;
-//     }
-
-// };
+#include "os.h"
 
 class pid{
 
-private:
-    float kp,ki,kd;
-
-    float _last_var;
-    float _cur_var;
-    float _target;
-    float _accumated_error;
-    float _output;
-
-    bool _tar_is_set = false;
     using value_type = float;
     using f_t = float(*)();
     using callback_t = void(*)(float y);
-    using f_item = float(*)(pid*);
+private:
+
+    float _kp,_ki,_kd;
+
+    float _last_output_signal;
+    float _cur_output_signal;
+    float _reference_signal;
+    float _accumated_error;
+    float control_signal;
+    bool _tar_is_set = false;
+    int8_t _label = '?';
 
     f_t get_cur_val;
     callback_t callback;
-    f_item get_differentiate;
+    f_t get_differentiate = nullptr;
 
+    float _builtin_get_differentiate(){
+        return _cur_output_signal - _last_output_signal;
+    }
 
 public:
     pid(float kp,float ki,float kd,
         f_t get_cur_val,
         callback_t callback,
-        f_item get_differentiate = [](pid* obj)->float{return obj->getVarDelta();}) :kp(kp),ki(ki),kd(kd),
+        f_t get_differentiate = nullptr) :_kp(kp),_ki(ki),_kd(kd),
                 get_cur_val(get_cur_val),
                 callback(callback),
                 get_differentiate(get_differentiate){}
 
     void run(){
         if(_tar_is_set){
-            _cur_var = get_cur_val();
-            _accumated_error += _cur_var;
-            _output = kp* (_target - _cur_var) + ki*_accumated_error + kd*get_differentiate(this);
-            callback(_output);
+            _cur_output_signal = get_cur_val();
+            _accumated_error += _cur_output_signal;
+            control_signal = _kp* (_reference_signal - _cur_output_signal) + _ki*_accumated_error + _kd* (get_differentiate?get_differentiate():_builtin_get_differentiate());
+            callback(control_signal);
         }
     }
 
+    void setLabel(int8_t label){
+        _label = label;
+    }
+
     void setTarget(float target){
-        _target = target;
+        _reference_signal = target;
         _accumated_error = 0;
-        _cur_var = 0;
-        _last_var = 0;
+        _cur_output_signal = 0;
+        _last_output_signal = 0;
         _tar_is_set = true;
     }
 
-    void setPID(float kp,float ki,float kd){
-        this->kp = kp;
-        this->ki = ki;
-        this->kd = kd;
+    void setParam(float kp,float ki,float kd){
+        this->_kp = kp;
+        this->_ki = ki;
+        this->_kd = kd;
     }
 
     float getCurError() const {
-        return _target - _cur_var;
-    }
-
-    float getVarDelta() const {
-        return _cur_var - _last_var;
+        return _reference_signal - _cur_output_signal;
     }
 
     float getOutput() const {
-        return _output;
+        return control_signal;
+    }
+
+    int8_t getLabel() const {
+        return _label;
     }
 
 };
