@@ -35,7 +35,6 @@ float omega_g = 802.04859078;
 void pitch_set_pwm(float alpha){
     motorObjList[0]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
     motorObjList[3]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
-
 }
 
 void roll_set_pwm(float alpha){
@@ -46,8 +45,6 @@ void roll_set_pwm(float alpha){
 void yaw_set_pwm(float beta){
 
 }
-
-
 
 //内环PID p i d 获取当前角速度 计算出当前角加速度后的回调 获取当前导数（角加速度）
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
@@ -88,15 +85,29 @@ void epid_run(pid& controller){
     controller.run();
 }
 
+OS_EVENT* pitch_internal_get_ref;
+OS_EVENT* yaw_internal_get_ref;
+OS_EVENT* roll_internal_get_ref;
+
+#define THRESHOLE 0.02
+
 void TEST_PID_EXTERNAL(void* arg){
     epid_pitch_controller.setTarget(0);
     epid_roll_controller.setTarget(0);
     epid_yaw_controller.setTarget(0);
+
+    pitch_internal_get_ref = OSSemCreate(1);
+    yaw_internal_get_ref = OSSemCreate(1);
+    roll_internal_get_ref = OSSemCreate(1);
+
     for(;;)
     {
-        epid_run(epid_pitch_controller);
-        epid_run(epid_roll_controller);
-        epid_run(epid_yaw_controller);
+        if(OSSemAccept(pitch_internal_get_ref))
+            epid_run(epid_pitch_controller);
+        if(OSSemAccept(roll_internal_get_ref))
+            epid_run(epid_roll_controller);
+        if(OSSemAccept(yaw_internal_get_ref))
+            epid_run(epid_yaw_controller);
         //绘制当前角速度期望值
         //cout << epid_pitch_controller.getOutput() << endl;
         OSTimeDlyHMSM(0, 0, 0, 200);
@@ -107,8 +118,11 @@ void TEST_PID_INTERNAL(void* arg){
     for(;;)
     {
         ipid_yaw_controller.run();
+        if(abs(ipid_yaw_controller.getCurError()) < THRESHOLE) OSSemPost(yaw_internal_get_ref);
         ipid_pitch_controller.run();
+        if(abs(ipid_pitch_controller.getCurError()) < THRESHOLE)  OSSemPost(pitch_internal_get_ref);
         ipid_roll_controller.run();
+        if(abs(ipid_roll_controller.getCurError()) < THRESHOLE)  OSSemPost(roll_internal_get_ref);
         OSTimeDlyHMSM(0, 0, 0, 50);
     }
 }
