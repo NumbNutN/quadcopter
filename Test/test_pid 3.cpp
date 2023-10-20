@@ -34,18 +34,16 @@ extern motor* motorObjList[4];
 const float expK = 10000000;
 float omega_g = 441.708435;
 
+float k = 0.001;
+
 void pitch_set_pwm(float alpha){
-    // motorObjList[0]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
-    // motorObjList[3]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
-    motorObjList[0]->setDuty(0.069 - 0.05*alpha);
-    motorObjList[3]->setDuty(0.069 + 0.05*alpha);
+    motorObjList[0]->setAddDuty(- k*alpha);
+    motorObjList[3]->setAddDuty(k*alpha);
 }
 
 void roll_set_pwm(float alpha){
-    // motorObjList[1]->setAngularVehicle(sqrt(omega_g*omega_g - expK*alpha));
-    // motorObjList[2]->setAngularVehicle(sqrt(omega_g*omega_g + expK*alpha));
-    motorObjList[1]->setDuty(0.069 - 0.05*alpha);
-    motorObjList[2]->setDuty(0.069 + 0.05*alpha);
+    motorObjList[1]->setAddDuty(- k*alpha);
+    motorObjList[2]->setAddDuty(k*alpha);
 }
 
 void yaw_set_pwm(float beta){

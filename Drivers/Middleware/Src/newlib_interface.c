@@ -36,12 +36,8 @@ _write (int file, const void * ptr, size_t len)
     //         OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)ptr++));
     //     }
     // }
-
-    for(i =0;i<len;++i)
-    {
-        HAL_UART_Transmit(&huart1, &(((uint8_t*)ptr)[i]), 1, 0);
-        delay_ms(1);
-    }
+    
+    HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
 
     return len;
 }

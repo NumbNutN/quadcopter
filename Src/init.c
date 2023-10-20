@@ -22,8 +22,8 @@ void Task_Init(void){
 void Peripherals_Init(void){
 
     I2C_Init((uint32_t)I2C1);
-    SSD1306_Init();
-    OLED_Clean();
+    // SSD1306_Init();
+    // OLED_Clean();
 
 }
 

@@ -27,6 +27,8 @@ public:
 		__HAL_TIM_SET_COMPARE(htim,channel,0.05*htim->Instance->ARR);
 		OSTimeDlyHMSM(0, 0, 3, 0);
 
+		setDuty(0.067);updateDuty();
+
 	}
 
 	void setLabel(int8_t label) {
@@ -34,9 +36,15 @@ public:
 	}
 
 	void setDuty(float dutyCycle){
-		if(dutyCycle > 0.075) dutyCycle = 0.075;
-		if(dutyCycle < 0.06) dutyCycle = 0.06;
-		_dutyCycle = dutyCycle;
+		if(dutyCycle > 0.071) dutyCycle = 0.071;
+		else if(dutyCycle < 0.06) dutyCycle = 0.06;
+		else _dutyCycle = dutyCycle;
+	}
+
+	void setAddDuty(float deltaDutyCycle){
+		if(_dutyCycle + deltaDutyCycle > 0.071) _dutyCycle = 0.071;
+		else if(_dutyCycle + deltaDutyCycle < 0.06) _dutyCycle = 0.06;
+		else _dutyCycle += deltaDutyCycle;
 	}
 
 	void updateDuty(){
