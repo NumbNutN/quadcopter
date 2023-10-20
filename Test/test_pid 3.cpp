@@ -14,16 +14,20 @@
 
 #include "myMath.hpp"
 #include "motor.hpp"
+#include "mpu6050.hpp"
+#include "hmc_5583l.hpp"
 
 #include "os.h"
 #include <math.h>
 
 using namespace std;
 
-extern quaternion last_gyro;
 extern quaternion cur_gyro;
-extern quaternion cur_accel;
-extern quaternion last_attitude;
+
+extern quaternion attitude;
+
+extern mpu6050* mpu6050_ptr;
+extern hmc_558l* hmc_ptr;
 
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
@@ -55,31 +59,31 @@ void yaw_set_pwm(float beta){
 
 
 pid ipid_pitch_controller(0.5,0.2,0.1,
-                        []()->float{return cur_gyro[0];},
+                        []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm);
 
 pid ipid_roll_controller(0.5,0.2,0.1,
-                        []()->float{return cur_gyro[1];},
+                        []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm);
 
 pid ipid_yaw_controller(0.5,0.2,0.1,
-                        []()->float{return cur_gyro[2];},
+                        []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm);
 
 pid epid_pitch_controller(0.5,0,0,
-                    []() -> float{return quat_get_Pitch(last_attitude);},
+                    []() -> float{return quat_get_Pitch(attitude);},
                     [](float tar)->void{ipid_pitch_controller.setTarget(tar);},
-                    []()->float{return cur_gyro[0];});
+                    []()->float{return mpu6050_ptr->get_current_gyro()[1];});
 
 pid epid_roll_controller(0.5,0,0,
-                    []() -> float{return quat_get_Roll(last_attitude);},
+                    []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{ipid_roll_controller.setTarget(tar);},
-                    []()->float{return cur_gyro[1];});
+                    []()->float{return mpu6050_ptr->get_current_gyro()[2];});
 
 pid epid_yaw_controller(0.5,0,0,
-                    []() -> float{return quat_get_Yaw(last_attitude);},
+                    []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{ipid_yaw_controller.setTarget(tar);},
-                    []()->float{return cur_gyro[2];});
+                    []()->float{return mpu6050_ptr->get_current_gyro()[3];});
 
 
 OS_EVENT* pitch_internal_get_ref;

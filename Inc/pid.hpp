@@ -5,7 +5,7 @@
 class pid{
 
     using value_type = float;
-    using f_t = float(*)();
+    using f_t = float(*const)();
     using callback_t = void(*)(float y);
 private:
 

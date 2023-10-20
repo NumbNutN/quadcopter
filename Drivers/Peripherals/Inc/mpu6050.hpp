@@ -21,6 +21,9 @@
 #include "i2c.h"
 #include "quaternion.hpp"
 
+#include "os.h"
+#include "delay.h"
+
 class mpu6050{
 
 private:
@@ -30,6 +33,11 @@ private:
     uint8_t* _gyroscope_data_ptr;
     double gk;
     double ak;
+
+    quaternion _last_gyro;
+
+    uint64_t _timeStamp;
+    double _deltaT;
 
 public:
     mpu6050()
@@ -73,6 +81,10 @@ public:
 
         /* acce = readData * k */
         ak = 1 / 65536.f * 8;
+
+        read(buffer, MPU6050_ACCELEROMETER, 14);
+        _timeStamp = Get_TimeStamp();
+
     }
 
     void read(uint8_t* buf,uint8_t pos,uint8_t size){
@@ -80,10 +92,17 @@ public:
     }
 
     void update(){
+
+        OS_CPU_SR cpu_sr;
+        OS_ENTER_CRITICAL();
+        _last_gyro = get_current_gyro();
         read(buffer, MPU6050_ACCELEROMETER, 14);
+        _deltaT = (float)(Get_TimeStamp() - _timeStamp) / HAL_RCC_GetHCLKFreq();
+        _timeStamp = Get_TimeStamp();
+        OS_EXIT_CRITICAL();
     }
 
-    quaternion get_gyro(){
+    quaternion get_current_gyro(){
         short xout,yout,zout;
         xout = _gyroscope_data_ptr[0]<<8 | _gyroscope_data_ptr[1];
         yout = _gyroscope_data_ptr[2]<<8 | _gyroscope_data_ptr[3];
@@ -91,7 +110,15 @@ public:
         return quaternion{0,xout * gk,yout * gk,zout * gk};
     }
 
-    quaternion get_accelero(){
+    quaternion get_last_gyro(){
+        return _last_gyro;
+    }
+
+    double getSamplePeriod(){
+        return _deltaT;
+    }
+
+    quaternion get_acceleration(){
         short xout,yout,zout;
         xout = (_accelerometer_data_ptr[0] << 8) | _accelerometer_data_ptr[1];
         yout = (_accelerometer_data_ptr[2] << 8) | _accelerometer_data_ptr[3];

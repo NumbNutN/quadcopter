@@ -64,6 +64,12 @@ extern void doNothing(void);
     #define Test_Motor_Init doNothing
 #endif
 
+#if TEST_MADGRICK_EN > 0u
+    #define Test_Madgwick_Init TEST_Madgwick_Init
+#else
+    #define Test_Madgwick_Init doNothing
+#endif
+
 /**
 * @brief gy-86数据采集
 */
@@ -86,3 +92,7 @@ extern void TEST_Print_Accel_Init(void);
 extern void TEST_PID_Init(void);
 
 extern void TEST_Motor_Init(void);
+
+extern void TEST_HMC_Init(void);
+
+extern void TEST_Madgwick_Init(void);

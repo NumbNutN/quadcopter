@@ -27,8 +27,8 @@ quaternion cur_accel;
 quaternion last_attitude{1,0,0,0};
 double gyro_sampling_duty;
 
-OS_STK Stk_RK4[1024];
-OS_STK Stk_Rk4_Print[1024];
+
+OS_STK Stk_Madgwick[1024];
 
 quaternion get_m_omega(double theta)
 {
@@ -68,6 +68,8 @@ quaternion gauss_newton_method(const quaternion& q){
             quaternion{0,-4*q[1],-4*q[2],0} * error_function[3];
 }
 
+
+
 void TEST_Task_RK1_Attitude_Calculate(void* arg){
 
     mpu6050 mpu6050_dev;
@@ -92,11 +94,11 @@ void TEST_Task_RK1_Attitude_Calculate(void* arg){
         last_attitude.normalization();
 
         //高斯牛顿迭代获取加速度计姿态
-        cur_accel = mpu6050_dev.get_accelero();
-        // for(int i=0;i<2;++i)
-        //     last_attitude = gradient_decent(last_attitude,error_function_gradient,0.5);
+        cur_accel = mpu6050_dev.get_acceleration();
         last_attitude = gauss_newton_method(last_attitude);
         last_attitude.normalization();
+        cout << quat_get_Pitch(last_attitude) << endl;
+        // cout << "R " << quat_get_Roll(last_attitude) << endl;
         
         //更新数据
         last_gyro = cur_gyro;
@@ -115,7 +117,7 @@ void TEST_Task_Attitude(void* arg){
 
 void TEST_RK4_Init()
 {
-    OSTaskCreate(TEST_Task_RK1_Attitude_Calculate, (void*)0, &Stk_RK4[1023], TASK_RK4_PRIO);
+    OSTaskCreate(TEST_Task_RK1_Attitude_Calculate, (void*)0, &Stk_Madgwick[1023], TASK_RK4_PRIO);
     //OSTaskCreate(TEST_Task_Attitude, NULL, &Stk_Rk4_Print[1023], TASK_RK4_PRINT_PRIO);
 }
 

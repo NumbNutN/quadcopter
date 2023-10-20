@@ -7,10 +7,12 @@
 
 #include <iostream>
 
-OS_STK Stk_Motor1Init[512];
-OS_STK Stk_Motor2Init[512];
-OS_STK Stk_Motor3Init[512];
-OS_STK Stk_Motor4Init[512];
+#define MOTOR_STACK_SIZE 256
+
+OS_STK Stk_Motor1Init[MOTOR_STACK_SIZE];
+OS_STK Stk_Motor2Init[MOTOR_STACK_SIZE];
+OS_STK Stk_Motor3Init[MOTOR_STACK_SIZE];
+OS_STK Stk_Motor4Init[MOTOR_STACK_SIZE];
 
 #define TASK_MOTOR1_PRIO 14u
 #define TASK_MOTOR2_PRIO 15u
@@ -55,10 +57,10 @@ void TEST_Task_Motor(void* channel){
 void TEST_Motor_Init()
 {
 
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_1, &Stk_Motor1Init[511], TASK_MOTOR1_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_2, &Stk_Motor2Init[511], TASK_MOTOR2_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_3, &Stk_Motor3Init[511], TASK_MOTOR3_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_4, &Stk_Motor4Init[511], TASK_MOTOR4_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_1, &Stk_Motor1Init[MOTOR_STACK_SIZE-1], TASK_MOTOR1_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_2, &Stk_Motor2Init[MOTOR_STACK_SIZE-1], TASK_MOTOR2_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_3, &Stk_Motor3Init[MOTOR_STACK_SIZE-1], TASK_MOTOR3_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_4, &Stk_Motor4Init[MOTOR_STACK_SIZE-1], TASK_MOTOR4_PRIO);
 }
 
 #endif
