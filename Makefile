@@ -84,7 +84,8 @@ CPP_SOURCES = \
 Test/test_cpp.cpp \
 Src/runge_kutta.cpp \
 Src/quaternion_math.cpp \
-Drivers/Peripherals/Src/receive.cpp
+Drivers/Peripherals/Src/receive.cpp \
+Src/zyc_madgwick.cpp
 
 
 # ASM sources
