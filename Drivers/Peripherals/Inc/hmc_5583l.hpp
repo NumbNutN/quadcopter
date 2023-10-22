@@ -40,10 +40,19 @@ public:
     quaternion getMagnetic(){
         return quaternion{
             0,
-            ((buffer[0] << 8) + buffer[1]) / 4096.0f * 1.76,
-            ((buffer[4] << 8) + buffer[5]) / 4096.0f * 1.76,
-            ((buffer[2] << 8) + buffer[3]) / 4096.0f * 1.76,
+            ((buffer[0] << 8) | buffer[1]) / 4096.0f * 1.76,
+            ((buffer[4] << 8) | buffer[5]) / 4096.0f * 1.76,
+            ((buffer[2] << 8) | buffer[3]) / 4096.0f * 1.76,
         };
+    }
+
+    quaternion getMagneticWithoutZ(){
+        return quaternion{
+            0,
+            ((buffer[0] << 8) | buffer[1]) / 4096.0f * 1.76,
+            ((buffer[4] << 8) | buffer[5]) / 4096.0f * 1.76,
+            0
+        }.normalization();
     }
 
     ~hmc_558l() = default;

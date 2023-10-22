@@ -39,13 +39,9 @@ public:
         //printf("move constructor\n");
     }
 
-    quaternion& normalization() {
-        double len = sqrt(dat[0]*dat[0]+dat[1]*dat[1]+dat[2]*dat[2]+dat[3]*dat[3]);
-        dat[0] = dat[0] / len;
-        dat[1] = dat[1] / len;
-        dat[2] = dat[2] / len;
-        dat[3] = dat[3] / len;
-        return *this;
+    quaternion normalization() const{
+        double len = sqrt(dat[0]*dat[0]+dat[1]*dat[1]+dat[2]*dat[2]+dat[3]*dat[3]);        
+        return quaternion{dat[0] / len,dat[1] / len,dat[2] / len,dat[3] / len};
     }
 
     double length() {
@@ -106,6 +102,10 @@ inline quaternion operator*(const quaternion& a,const quaternion& b) {
         a[3]*b[0] - a[2]*b[1] + a[1]*b[2] + a[0]*b[3]
     );
 }
+
+
+// template <typename T>
+// concept Scaleable = requires(T x){x*x;}
 
 template <typename T>
 quaternion operator*(T scale, const quaternion &q) {

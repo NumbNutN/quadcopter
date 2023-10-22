@@ -15,11 +15,10 @@
 #define MPU6050_GYRO_XYZ_BASE 0x43
 #define MPU6050_ACCELEROMETER 0x3B
 
-#define PI 3.141592654
-
 #include <stdint.h>
 #include "i2c.h"
 #include "quaternion.hpp"
+#include "myMath.hpp"
 
 #include "os.h"
 #include "delay.h"
@@ -33,6 +32,10 @@ private:
     uint8_t* _gyroscope_data_ptr;
     double gk;
     double ak;
+
+    double _xOffset = 0.0f;
+    double _yOffset = 0.0f;
+    double _zOffset = 0.0f;
 
     quaternion _last_gyro;
 
@@ -97,7 +100,7 @@ public:
         OS_ENTER_CRITICAL();
         _last_gyro = get_current_gyro();
         read(buffer, MPU6050_ACCELEROMETER, 14);
-        _deltaT = (float)(Get_TimeStamp() - _timeStamp) / HAL_RCC_GetHCLKFreq();
+        _deltaT = (float)(Get_TimeStamp() - _timeStamp) / HAL_RCC_GetSysClockFreq();
         _timeStamp = Get_TimeStamp();
         OS_EXIT_CRITICAL();
     }
@@ -107,7 +110,7 @@ public:
         xout = _gyroscope_data_ptr[0]<<8 | _gyroscope_data_ptr[1];
         yout = _gyroscope_data_ptr[2]<<8 | _gyroscope_data_ptr[3];
         zout = _gyroscope_data_ptr[4]<<8 | _gyroscope_data_ptr[5];
-        return quaternion{0,xout * gk,yout * gk,zout * gk};
+        return quaternion{0,xout * gk - _xOffset,yout * gk - _yOffset,zout * gk - _zOffset};
     }
 
     quaternion get_last_gyro(){
@@ -124,5 +127,22 @@ public:
         yout = (_accelerometer_data_ptr[2] << 8) | _accelerometer_data_ptr[3];
         zout = (_accelerometer_data_ptr[4] << 8) | _accelerometer_data_ptr[5];
         return quaternion{0,xout * ak,yout * ak,zout * ak};
+    }
+
+    void alignment(size_t times){
+        int64_t totalX=0,totalY=0,totalZ=0;
+        for(int i=0;i<times;++i){
+            read(_gyroscope_data_ptr, MPU6050_GYRO_XYZ_BASE, 6);
+            totalX += (short)(_gyroscope_data_ptr[0]<<8 | _gyroscope_data_ptr[1]);
+            totalY += (short)(_gyroscope_data_ptr[2]<<8 | _gyroscope_data_ptr[3]);
+            totalZ += (short)(_gyroscope_data_ptr[4]<<8 | _gyroscope_data_ptr[5]);
+        }
+        totalX /= times;
+        totalY /= times;
+        totalZ /= times;
+
+        _xOffset = totalX * gk;
+        _yOffset = totalY * gk;
+        _zOffset = totalZ * gk;
     }
 };
