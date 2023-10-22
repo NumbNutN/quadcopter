@@ -24,8 +24,6 @@ using namespace std;
 OS_STK Stk_Madgwick[512];
 OS_STK Stk_PrintMadgwick[512];
 
-quaternion attitude = {1,0,0,0};
-
 quaternion earth_magnetic{0,0.66436113595878288,0,0.74741172122703259};
 // quaternion earth_magnetic{0,1,0,0};
 
@@ -81,45 +79,77 @@ quaternion magnetic_gradient(const quaternion& q,const quaternion& magnetic){
 
 // }
 
+quaternion GuassianFilter(const quaternion& gyro){
+    static quaternion historyList[5];
+    static size_t index = 0;
+    quaternion average = {0,0,0,0};
+
+    historyList[index++ % 5] = gyro;
+    for(int i=0;i<5;++i)
+        average += historyList[i];
+    // static vector<quaternion> v5(5,quaternion{0,0,0,0});
+    return index>=5?average/5:average/(index+1);
+}
+
 mpu6050* mpu6050_ptr;
 hmc_558l* hmc_ptr;
+
+quaternion attitude_gyro;
+quaternion acceleration_err_fun_gradient;
+quaternion magnetic_err_func_gradient;
+quaternion attitude_mixed;
+float deltaT;
+quaternion attitude;
+quaternion old_attitude = {1,0,0,0};
 
 void TEST_Madgwick(void* arg){
     mpu6050 mpu6050_dev;
     hmc_558l hmc_dev;
+    quaternion gyroData;
     mpu6050_ptr = &mpu6050_dev;
     hmc_ptr = &hmc_dev;
 
-    //校准陀螺仪
+    //校准陀螺仪的零偏误差
     mpu6050_dev.alignment(100);
 
     for(;;){
         mpu6050_dev.update();
         hmc_dev.update();
-        //quaternion mag = hmc_dev.getMagnetic();
-        float deltaT = mpu6050_dev.getSamplePeriod();
+        deltaT = mpu6050_dev.getSamplePeriod();
 
-        quaternion attitude_gyro = RK4(0,
-                attitude, 
+        //一阶龙格图塔计算姿态
+        attitude_gyro = RK1(0,
+                old_attitude, 
                 deltaT,
                 [](double t,quaternion q)->quaternion{
-                        return 0.5*q*  ((t/mpu6050_ptr->getSamplePeriod())*mpu6050_ptr->get_current_gyro() + (1-t/mpu6050_ptr->getSamplePeriod())*mpu6050_ptr->get_last_gyro());
+                        quaternion gyro = mpu6050_ptr->get_last_gyro();
+                        gyro = GuassianFilter(gyro);
+                        return 0.5*q*  ((t/mpu6050_ptr->getSamplePeriod())*mpu6050_ptr->get_current_gyro() + (1-t/mpu6050_ptr->getSamplePeriod())*gyro);
                     });
         
-        quaternion acceleration_err_fun_gradient = gauss_newton_method(attitude, mpu6050_dev.get_acceleration());
-        quaternion magnetic_err_func_gradient = magnetic_gradient(attitude, hmc_dev.getMagnetic().normalization());
-        quaternion attitude_mixed = (acceleration_err_fun_gradient+magnetic_err_func_gradient);
+        //为加速度计的误差函数计算梯度
+        acceleration_err_fun_gradient = accelator_gradient(old_attitude, mpu6050_dev.get_acceleration());
+        //为磁力计的误差函数计算梯度
+        magnetic_err_func_gradient = magnetic_gradient(old_attitude, hmc_dev.getMagnetic().normalization());
+        
+        attitude_mixed = (acceleration_err_fun_gradient+magnetic_err_func_gradient);
 
-        attitude = (attitude_gyro - 0.3*acceleration_err_fun_gradient.normalization()*deltaT).normalization();
+        //Madgwick
+        attitude = (attitude_gyro - 0.05*acceleration_err_fun_gradient.normalization()*deltaT).normalization();
+        
+        //if(quat_get_Roll(attitude) )s
         //attitude = (attitude_gyro).normalization();
-        //attitude = attitude_gyro;
+        //attitude = (attitude - acceleration_err_fun_gradient*0.5).normalization();
         //cout << attitude_mixed.length() << endl;
         //attitude = (attitude_gyro - attitude_mixed).normalization();
         //attitude = attitude.normalization();     
 
-        //是否是1/2
-        //attitude = 0.5*(attitude - attitude_acceleration).normalization() + 0.5*attitude_gyro.normalization();           
+        //测试置信度是否是1/2
+        //attitude = 0.5*(attitude - attitude_acceleration).normalization() + 0.5*attitude_gyro.normalization();    
 
+        //为四元数添加低通滤波去除尖刺
+        if(abs(quat_get_Pitch(old_attitude) - quat_get_Pitch((attitude))) > 0.2) attitude = old_attitude;
+        old_attitude = attitude;
         OSTimeDlyHMSM(0, 0, 0, 10);
     }
 }
@@ -129,6 +159,10 @@ void TEST_Task_Print_Attitude(void* arg){
     {
         if(quat_get_Pitch(attitude) > 3.1415926 || quat_get_Pitch(attitude) < - 3.1415926)
             cout << 999 << endl;
+        // cout << "M " << quat_get_Roll(attitude) << endl;
+        // cout << "A " << quat_get_Roll(attitude - 0.3*acceleration_err_fun_gradient.normalization()*deltaT) << endl;
+        //cout << quat_get_Roll(attitude_gyro) << endl;
+        // cout << "G " << mpu6050_ptr->get_current_gyro()[1] << endl;
         cout << quat_get_Roll(attitude) << endl;
         OSTimeDlyHMSM(0, 0, 0, 150);
     }

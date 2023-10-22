@@ -42,12 +42,16 @@ float k = 0.001;
 
 void pitch_set_pwm(float alpha){
     motorObjList[0]->setAddDuty(- k*alpha);
+    motorObjList[1]->setAddDuty(- k*alpha);
     motorObjList[3]->setAddDuty(k*alpha);
+    motorObjList[2]->setAddDuty(k*alpha);
 }
 
 void roll_set_pwm(float alpha){
     motorObjList[1]->setAddDuty(- k*alpha);
+    motorObjList[3]->setAddDuty(- k*alpha);
     motorObjList[2]->setAddDuty(k*alpha);
+    motorObjList[0]->setAddDuty(k*alpha);
 }
 
 void yaw_set_pwm(float beta){
@@ -58,29 +62,29 @@ void yaw_set_pwm(float beta){
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
 
 
-pid ipid_pitch_controller(0.5,0.2,0.1,
+pid ipid_pitch_controller(0.3,0.1,0.2,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm);
 
-pid ipid_roll_controller(0.5,0.2,0.1,
+pid ipid_roll_controller(0.3,0.1,0.2,
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm);
 
-pid ipid_yaw_controller(0.5,0.2,0.1,
+pid ipid_yaw_controller(0.3,0.1,0.2,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm);
 
-pid epid_pitch_controller(0.5,0,0,
+pid epid_pitch_controller(0.9,0,0,
                     []() -> float{return quat_get_Pitch(attitude);},
                     [](float tar)->void{ipid_pitch_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[1];});
 
-pid epid_roll_controller(0.5,0,0,
+pid epid_roll_controller(0.9,0,0,
                     []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{ipid_roll_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];});
 
-pid epid_yaw_controller(0.5,0,0,
+pid epid_yaw_controller(0.9,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{ipid_yaw_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];});

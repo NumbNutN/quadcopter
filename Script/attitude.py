@@ -18,41 +18,31 @@ def draw_attitude(void):
         data = ser.readline().split()
         if(len(data)!=4):
             return
+        print(data) 
         # quaternion repesenting current attitude
         quat = [float(x) for x in data]
 
-        rotation_matrix = quat2DCM(quat)
-        
-        # rotation_matrix[0].append(rotation_matrix[0][0])
-        # rotation_matrix[1].append(rotation_matrix[1][0])
-        # rotation_matrix[2].append(rotation_matrix[2][0])
-        # rotation_matrix[0].append(0)
-        # rotation_matrix[1].append(0)
-        # rotation_matrix[2].append(0)
-        # rotation_matrix[0].append(rotation_matrix[0][1])
-        # rotation_matrix[1].append(rotation_matrix[1][1])
-        # rotation_matrix[2].append(rotation_matrix[2][1])
-        # rotation_matrix[0].append(0)
-        # rotation_matrix[1].append(0)
-        # rotation_matrix[2].append(0)
-        # rotation_matrix[0].append(rotation_matrix[0][2])
-        # rotation_matrix[1].append(rotation_matrix[1][2])
-        # rotation_matrix[2].append(rotation_matrix[2][2])        
-
+        rotation_matrix = quat2DCM(quat)     
         rotation_matrix = np.array(rotation_matrix)
         plt.cla()
-        # ax.plot(rotation_matrix[0],rotation_matrix[1],rotation_matrix[2],color='m')
         # 设置坐标轴范围
         ax.set_xlim(-1, 1)
         ax.set_ylim(-1, 1)
         ax.set_zlim(-1, 1)
-        ax.quiver(np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),rotation_matrix[0],rotation_matrix[1],rotation_matrix[2])
+        ax.quiver(0,0,0,rotation_matrix[0][0],rotation_matrix[1][0],rotation_matrix[2][0],label="x")
+        ax.quiver(0,0,0,rotation_matrix[0][1],rotation_matrix[1][1],rotation_matrix[2][1],label="y")
+        ax.quiver(0,0,0,rotation_matrix[0][2],rotation_matrix[1][2],rotation_matrix[2][2],label="z")
+        #ax.quiver(np.array([0,0,0]),np.array([0,0,0]),np.array([0,0,0]),rotation_matrix[0],rotation_matrix[1],rotation_matrix[2])
 
 if __name__ == "__main__":
     #使用可交互式GUI TkAgg
     matplotlib.use('TkAgg')
     ser = serial.Serial('/dev/ttyUSB0',115200,timeout=0)
 
+    # while(1):
+    #     data = ser.readline().split()
+    #     if(len(data)==4):
+    #         print(data) 
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
 
