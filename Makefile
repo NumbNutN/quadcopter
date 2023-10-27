@@ -85,7 +85,7 @@ Test/test_cpp.cpp \
 Src/runge_kutta.cpp \
 Src/quaternion_math.cpp \
 Drivers/Peripherals/Src/receive.cpp \
-Src/zyc_madgwick.cpp
+Src/anoUplink.cpp
 
 
 # ASM sources
@@ -155,7 +155,7 @@ C_INCLUDES =  \
 -IDrivers/Middleware/Inc \
 -IDrivers/Peripherals/Inc \
 -ITest \
--IEmbeddedLapack/EmbeddedLapack/src \
+-I. \
 -I/usr/include/newlib \
 -I/usr/include/newlib/c++/9.2.1/arm-none-eabi/thumb/v7e-m+fp/hard \
 -I/usr/include/newlib/c++/9.2.1

@@ -45,10 +45,6 @@ void TEST_Task_Motor(void* channel){
     }
 
     for(;;){
-        // duty += 0.001;
-        // m.setDuty(duty);
-        // if(m.getLabel() == 'a')
-        //     cout <<m.get_dutyCycle() << endl;
         m.updateDuty();
         OSTimeDlyHMSM(0, 0, 0, 200);
     }

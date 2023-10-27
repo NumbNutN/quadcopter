@@ -12,6 +12,8 @@ using namespace std;
 #include "test_pid 3.cpp"
 #include "test_motor.cpp"
 #include "test_madgrick.cpp"
+#include "test_paper_mad.cpp"
+#include "test_mahony.cpp"
 
 void TEST_stream()
 {

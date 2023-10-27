@@ -12,7 +12,7 @@
 记录Systick总计数值
 在84M下，时间戳可记录2541714天
 */
-#define Get_TimeStamp() ((_count_systick+1) * SysTick->LOAD - SysTick->VAL)
+#define Get_TimeStamp() ((_count_systick+1) * (uint64_t)SysTick->LOAD - SysTick->VAL)
 
 void delay_init();
 

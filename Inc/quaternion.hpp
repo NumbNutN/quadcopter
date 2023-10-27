@@ -64,6 +64,10 @@ public:
     friend quaternion operator+(const quaternion& a,const quaternion& b);
     friend quaternion operator*(const quaternion& a,const quaternion& b);
     friend quaternion operator-(const quaternion& a,const quaternion& b);
+    /* 定义叉乘 */
+    friend quaternion operator^(const quaternion& a,const quaternion& b);
+    /* 定义点乘 */
+    friend double operator&(const quaternion& a,const quaternion& b);
     
     template <typename T>
     friend quaternion operator*(T scale, const quaternion &q);
@@ -71,7 +75,12 @@ public:
     template <typename T>
     friend quaternion operator/(const quaternion &q,T scale);
 
-    double operator[](size_t index) const{
+    double& operator[](size_t index) {
+        return dat[index];
+    }
+
+    //read only
+    double operator[](size_t index) const {
         return dat[index];
     }
 
@@ -120,4 +129,18 @@ quaternion operator/(const quaternion &q,T scale) {
 inline ostream& operator<<(ostream& out,const quaternion& q) {
     out << q[0] << " " << q[1] << " " << q[2] << " " << q[3];
     return out;
+}
+
+inline quaternion operator^(const quaternion&a, const quaternion& b){
+    return
+    quaternion{
+        0,
+        a[2]*b[3] - a[3]*b[2],
+        a[3]*b[1] - a[1]*b[3],
+        a[1]*b[2] - a[2]*b[1]
+    };
+}
+
+inline double operator&(const quaternion& a,const quaternion& b){
+    return a[0]*b[0]+ a[1]*b[1]+ a[2]*b[2]+ a[3]*b[3];
 }

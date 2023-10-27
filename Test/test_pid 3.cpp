@@ -17,6 +17,7 @@
 #include "mpu6050.hpp"
 #include "hmc_5583l.hpp"
 
+#include "usart.h"
 #include "os.h"
 #include <math.h>
 
@@ -38,7 +39,7 @@ extern motor* motorObjList[4];
 const float expK = 10000000;
 float omega_g = 441.708435;
 
-float k = 0.001;
+float k = 0.01;
 
 void pitch_set_pwm(float alpha){
     motorObjList[0]->setAddDuty(- k*alpha);
@@ -62,29 +63,29 @@ void yaw_set_pwm(float beta){
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
 
 
-pid ipid_pitch_controller(0.3,0.1,0.2,
+pid ipid_pitch_controller(0.5,0.1,1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm);
 
-pid ipid_roll_controller(0.3,0.1,0.2,
+pid ipid_roll_controller(0.5,0.1,1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm);
 
-pid ipid_yaw_controller(0.3,0.1,0.2,
+pid ipid_yaw_controller(0.5,0.1,1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm);
 
-pid epid_pitch_controller(0.9,0,0,
+pid epid_pitch_controller(0.5,0,0,
                     []() -> float{return quat_get_Pitch(attitude);},
                     [](float tar)->void{ipid_pitch_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[1];});
 
-pid epid_roll_controller(0.9,0,0,
+pid epid_roll_controller(0.5,0,0,
                     []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{ipid_roll_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];});
 
-pid epid_yaw_controller(0.9,0,0,
+pid epid_yaw_controller(0.5,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{ipid_yaw_controller.setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];});
@@ -107,7 +108,7 @@ void TEST_PID_EXTERNAL(void* arg){
         //OSSemPend(sem,0,&err);
         controller->run();
         // cout << controller->getLabel() << ' '<< controller->getOutput() << endl;
-        OSTimeDlyHMSM(0, 0, 0, 200);
+        OSTimeDlyHMSM(0, 0, 0, 100);
     }
 }
 
@@ -121,9 +122,12 @@ void TEST_PID_INTERNAL(void* arg){
         //     OSSemPost();
         // if(controller->getLabel() == 'r')
         //     cout << controller->getOutput() << endl;
-        OSTimeDlyHMSM(0, 0, 0, 20);
+        OSTimeDlyHMSM(0, 0, 0, 10);
     }
 }
+
+int8_t pid_command[16];
+
 
 void TEST_PID_Init()
 {
@@ -135,6 +139,27 @@ void TEST_PID_Init()
     OSTaskCreate(TEST_PID_INTERNAL, &ipid_roll_controller, &Stk_PID_Interal[511], TASK_PID_ROLL_INTERNAL_PRIO);
     OSTaskCreate(TEST_PID_EXTERNAL, &epid_pitch_controller, &Stk_PID_Exteral[1023], TASK_PID_PITCH_EXTERNAL_PRIO);
     OSTaskCreate(TEST_PID_EXTERNAL, &epid_roll_controller, &Stk_PID_Exteral[511], TASK_PID_ROLL_EXTERNAL_PRIO);
+
+    //设置PID 参数调节接收
+    HAL_UART_Receive_IT(&huart1, (uint8_t*)pid_command, 16);
 }
+
+// void 
+
+// //串口回调函数
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+// {
+// 	if(huart->Instance == USART1){
+// 		if(cmd == 0xA1){
+// 			LED0_Tog;
+// 			HAL_UART_Transmit(&huart1, "Toggle LED0!\r\n", sizeof("Toggle LED0!\r\n"),10000);
+// 		}
+// 		if(cmd == 0xA2){
+// 			LED1_Tog;
+// 			HAL_UART_Transmit(&huart1, "Toggle LED1!\r\n", sizeof("Toggle LED1!\r\n"),10000);
+// 		}
+// 		HAL_UART_Receive_IT(&huart1, &cmd, 1);
+// 	}
+// }
 
 #endif

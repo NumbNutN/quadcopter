@@ -5,6 +5,9 @@
 
 #include "os.h"
 
+#define MAX_CYCLE_DUTY 0.073
+#define MIN_CYCLE_DUTY 0.06
+
 class motor{
 
 private:
@@ -36,14 +39,14 @@ public:
 	}
 
 	void setDuty(float dutyCycle){
-		if(dutyCycle > 0.071) dutyCycle = 0.071;
-		else if(dutyCycle < 0.06) dutyCycle = 0.06;
+		if(dutyCycle > MAX_CYCLE_DUTY) dutyCycle = MAX_CYCLE_DUTY;
+		else if(dutyCycle < MIN_CYCLE_DUTY) dutyCycle = MIN_CYCLE_DUTY;
 		else _dutyCycle = dutyCycle;
 	}
 
 	void setAddDuty(float deltaDutyCycle){
-		if(_dutyCycle + deltaDutyCycle > 0.071) _dutyCycle = 0.071;
-		else if(_dutyCycle + deltaDutyCycle < 0.06) _dutyCycle = 0.06;
+		if(_dutyCycle + deltaDutyCycle > MAX_CYCLE_DUTY) _dutyCycle = MAX_CYCLE_DUTY;
+		else if(_dutyCycle + deltaDutyCycle < MIN_CYCLE_DUTY) _dutyCycle = MIN_CYCLE_DUTY;
 		else _dutyCycle += deltaDutyCycle;
 	}
 

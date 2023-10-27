@@ -80,11 +80,11 @@ void TEST_Task_RK1_Attitude_Calculate(void* arg){
         if(__euler_angle_told == 0)
         {
             __euler_angle_told = Get_TimeStamp();
-            last_gyro = mpu6050_dev.get_gyro();
+            last_gyro = mpu6050_dev.get_current_gyro();
             OSTimeDlyHMSM(0, 0, 0, 100);
         }
         //2-n次获取IMU数据
-        cur_gyro = mpu6050_dev.get_gyro();
+        cur_gyro = mpu6050_dev.get_current_gyro();
         gyro_sampling_duty = ((double)Get_TimeStamp()-__euler_angle_told) / HAL_RCC_GetSysClockFreq();
         //Runge Kutta求解姿态
         last_attitude = RK1(0,
@@ -98,7 +98,7 @@ void TEST_Task_RK1_Attitude_Calculate(void* arg){
         last_attitude = gauss_newton_method(last_attitude);
         last_attitude.normalization();
         cout << quat_get_Pitch(last_attitude) << endl;
-        // cout << "R " << quat_get_Roll(last_attitude) << endl;
+        // cout << quat_get_Roll(last_attitude) << endl;
         
         //更新数据
         last_gyro = cur_gyro;
