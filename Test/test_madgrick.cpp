@@ -10,6 +10,7 @@
 #include "hmc_5583l.hpp"
 #include "gradient_decent.hpp"
 
+#include "myMath.hpp"
 #include <math.h>
 
 #include "os.h"
@@ -21,8 +22,8 @@
 
 using namespace std;
 
-OS_STK Stk_Madgwick[512];
-OS_STK Stk_PrintMadgwick[512];
+OS_STK Stk_Mahony[512];
+OS_STK Stk_PrintMahony[512];
 
 quaternion earth_magnetic{0,0.66436113595878288,0,0.74741172122703259};
 // quaternion earth_magnetic{0,1,0,0};
@@ -67,6 +68,22 @@ quaternion GuassianFilter(const quaternion& gyro){
     return index>=5?average/5:average/(index+1);
 }
 
+quaternion acceratorGuassianFilter(const quaternion& accel){
+    static quaternion historyList[15];
+    static size_t index = 0;
+    quaternion average = {0,0,0,0};
+
+    if(!(index %3))
+    {
+        historyList[index/3 % 15] = accel;
+    }
+    index++;
+    for(int i=0;i<15;++i)
+        average += historyList[i];
+
+    return index>=15?average/15:average/(index+1);
+}
+
 mpu6050* mpu6050_ptr;
 hmc_558l* hmc_ptr;
 
@@ -85,7 +102,7 @@ void TEST_Madgwick(void* arg){
     mpu6050_ptr = &mpu6050_dev;
     hmc_ptr = &hmc_dev;
 
-    //校准陀螺仪的零偏误差
+    // //校准陀螺仪的零偏误差
     mpu6050_dev.alignment(100);
 
     for(;;){
@@ -98,74 +115,56 @@ void TEST_Madgwick(void* arg){
                 old_attitude, 
                 deltaT,
                 [](double t,quaternion q)->quaternion{
-                        quaternion gyro = mpu6050_ptr->get_last_gyro();
-                        gyro = GuassianFilter(gyro);
-                        return 0.5*q*  ((t/mpu6050_ptr->getSamplePeriod())*mpu6050_ptr->get_current_gyro() + (1-t/mpu6050_ptr->getSamplePeriod())*gyro);
+                        quaternion last_gyro = mpu6050_ptr->get_last_gyro();
+                        // gyro = GuassianFilter(gyro);
+                        return 0.5*q*  ((t/deltaT)*mpu6050_ptr->get_current_gyro() + (1-t/deltaT)*last_gyro);
                     });
         
         //为加速度计的误差函数计算梯度
-        acceleration_err_fun_gradient = accelator_gradient(old_attitude, mpu6050_dev.get_acceleration());
+        acceleration_err_fun_gradient = accelator_gradient(old_attitude, acceratorGuassianFilter(mpu6050_dev.get_acceleration()));
         //为磁力计的误差函数计算梯度
         magnetic_err_func_gradient = magnetic_gradient(old_attitude, hmc_dev.getMagnetic().normalization());
         
         attitude_mixed = (acceleration_err_fun_gradient+magnetic_err_func_gradient);
 
         //Madgwick 不包含地磁
-        attitude = (attitude_gyro - 0.05*acceleration_err_fun_gradient.normalization()*deltaT).normalization();
-          
+        attitude = (attitude_gyro - 0.08*acceleration_err_fun_gradient.normalization()*deltaT).normalization();
+        //attitude = attitude_gyro.normalization();
 
         //为四元数添加低通滤波去除尖刺
-        if(abs(quat_get_Pitch(old_attitude) - quat_get_Pitch((attitude))) > 0.2) attitude = old_attitude;
+        //if(abs(quat_get_Pitch(old_attitude) - quat_get_Pitch((attitude))) > 0.2) attitude = old_attitude;
+        if(abs(old_attitude[0] - attitude[0]) > 0.2 ||
+            abs(old_attitude[1] - attitude[1]) > 0.2 ||
+            abs(old_attitude[2] - attitude[2]) > 0.2 || 
+            abs(old_attitude[3] - attitude[3]) > 0.2) 
+                attitude = old_attitude;
+
         old_attitude = attitude;
-        OSTimeDlyHMSM(0, 0, 0, 10);
+        OSTimeDlyHMSM(0, 0, 0, 20);
     }
 }
 
 void TEST_Task_Print_Attitude(void* arg){
     for(;;)
     {
-        if(quat_get_Pitch(attitude) > 3.1415926 || quat_get_Pitch(attitude) < - 3.1415926)
-            cout << 999 << endl;
+        // if(quat_get_Pitch(attitude) > 3.1415926 || quat_get_Pitch(attitude) < - 3.1415926)
+        //     cout << 999 << endl;
         // cout << "M " << quat_get_Roll(attitude) << endl;
         // cout << "A " << quat_get_Roll(attitude - 0.3*acceleration_err_fun_gradient.normalization()*deltaT) << endl;
         //cout << quat_get_Roll(attitude_gyro) << endl;
         // cout << "G " << mpu6050_ptr->get_current_gyro()[1] << endl;
-        cout << quat_get_Roll(attitude) << endl;
-        OSTimeDlyHMSM(0, 0, 0, 150);
+        // cout << quat_get_Roll(attitude) << endl;
+        ano_send_dataFrame(attitude);
+        //ano_send_quaternion(attitude);
+        OSTimeDlyHMSM(0, 0, 0, 100);
     }
 }
 
-// quaternion My_Madgwick_Update(const quaternion& quat, float ax, float ay, float az,\
-//                         float gx, float gy, float gz,\
-//                         float mx, float my, float mz);
 
-
-
-// void TEST_Madgwick(void* arg){
-//     mpu6050 mpu6050_dev;
-//     hmc_558l hmc_dev;
-//     mpu6050_ptr = &mpu6050_dev;
-//     hmc_ptr = &hmc_dev;
-
-//     for(;;){
-//         mpu6050_dev.update();
-//         hmc_dev.update();
-//         attitude = My_Madgwick_Update(attitude, mpu6050_dev.get_acceleration()[1], mpu6050_dev.get_acceleration()[2], mpu6050_dev.get_acceleration()[3],\
-//                 0, 0, 0.98,\
-//                 hmc_dev.getMagnetic()[1], hmc_dev.getMagnetic()[2], hmc_dev.getMagnetic()[3]);
-
-//         cout << quat_get_Pitch(attitude) << endl;
-//         OSTimeDlyHMSM(0, 0, 0, 100);
-//     }
-// }
-
-
-
-
-void TEST_Madgwick_Init()
+void TEST_Mahony_Init()
 {
-    OSTaskCreate(TEST_Task_Print_Attitude,NULL,&Stk_PrintMadgwick[511],TASK_MADGWICK_PRINT_PRIO);
-    OSTaskCreate(TEST_Madgwick, NULL, &Stk_Madgwick[511], TASK_MADGWICK_READ_PRIO);
+    OSTaskCreate(TEST_Task_Print_Attitude,NULL,&Stk_PrintMahony[511],TASK_MADGWICK_PRINT_PRIO);
+    OSTaskCreate(TEST_Madgwick, NULL, &Stk_Mahony[511], TASK_MADGWICK_READ_PRIO);
 }
 
 

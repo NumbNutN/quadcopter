@@ -63,6 +63,10 @@ public:
         this->_kd = kd;
     }
 
+    void setKp(float kp){this->_kp = kp;}
+    void setKi(float ki){this->_ki = ki;}
+    void setKd(float kd){this->_kd = kd;}
+
     float getCurError() const {
         return _reference_signal - _cur_output_signal;
     }
