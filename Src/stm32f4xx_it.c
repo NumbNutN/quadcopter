@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "config.h"
 #include "ucos_ii.h"
 #include "os_cpu.h"
 /* USER CODE END Includes */
@@ -58,6 +59,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
+extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 
@@ -209,29 +211,54 @@ void SysTick_Handler(void)
 void TIM1_CC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
-
+  OSIntEnter();
   /* USER CODE END TIM1_CC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_CC_IRQn 1 */
-
+  OSIntExit();
   /* USER CODE END TIM1_CC_IRQn 1 */
 }
 
-// size_t usart_trapped_in_counter = 0;
+extern void Pid_Param_Update();
+extern char pid_cmd[17];
 /**
   * @brief This function handles USART1 global interrupt.
   */
-// void USART1_IRQHandler(void)
-// {
-//   /* USER CODE BEGIN USART1_IRQn 0 */
-//   OSIntEnter();
-//   /* USER CODE END USART1_IRQn 0 */
-//   HAL_UART_IRQHandler(&huart1);
-//   /* USER CODE BEGIN USART1_IRQn 1 */
-//   OSIntExit();
-//   /* USER CODE END USART1_IRQn 1 */
-// }
-  
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+  OSIntEnter();
+  //判断中断响应类型
+  if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE) != RESET){
+    __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+    size_t unread  =  __HAL_DMA_GET_COUNTER(&hdma_usart1_rx); /*获取DMA中未传输的数据个数*/ 
+#if TEST_PID3_EN > 0u
+    Pid_Param_Update(); 
+    //使能DMA传输
+    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
+#endif
+  }
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+  OSIntExit();
+  /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream5 global interrupt.
+  */
+void DMA2_Stream5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream5_IRQn 0 */
+  OSIntEnter();
+  /* USER CODE END DMA2_Stream5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+  /* USER CODE BEGIN DMA2_Stream5_IRQn 1 */
+  OSIntExit();
+  /* USER CODE END DMA2_Stream5_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

@@ -5,8 +5,8 @@
 
 #include "os.h"
 
-#define MAX_CYCLE_DUTY 0.073
-#define MIN_CYCLE_DUTY 0.06
+#define MAX_CYCLE_DUTY 0.075
+#define MIN_CYCLE_DUTY 0.055
 
 class motor{
 

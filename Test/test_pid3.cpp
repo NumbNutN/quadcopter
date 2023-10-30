@@ -63,13 +63,13 @@ void yaw_set_pwm(float beta){
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
 
 pid ExternalControllerList[3] = {
-    pid(0.5,0.1,1,
+    pid(0.5,0.1,0.1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm),
-    pid(0.5,0.1,1,
+    pid(0.5,0.1,0.1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm),
-    pid(0.5,0.1,1,
+    pid(0.5,0.1,0.1,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm)
 };
@@ -89,47 +89,36 @@ pid InternalControllerList[3] = {
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];})
 };
 
-
-
-
 OS_EVENT* pitch_internal_get_ref;
 OS_EVENT* yaw_internal_get_ref;
 OS_EVENT* roll_internal_get_ref;
 
 #define THRESHOLE 0.02
 
-void TEST_PID_EXTERNAL(void* arg){
+void TEST_PID_EXTERNAL(void* idx){
 
-    pid* controller = (pid*)arg;
-    controller->setTarget(0);
-    // OS_EVENT* sem = OSSemCreate(1);
-    // INT8U err;
+    pid& controller = ExternalControllerList[size_t(idx)];
+    controller.setTarget(0);
     for(;;)
     {
-        //OSSemPend(sem,0,&err);
-        controller->run();
-        // cout << controller->getLabel() << ' '<< controller->getOutput() << endl;
+        controller.run();
         OSTimeDlyHMSM(0, 0, 0, 100);
     }
 }
 
-void TEST_PID_INTERNAL(void* arg){
+void TEST_PID_INTERNAL(void* idx){
 
-    pid* controller = (pid*)arg;
+    pid& controller = InternalControllerList[size_t(idx)];
     for(;;)
     {
-        controller->run();
-        // if(abs(controller->getCurError()) < THRESHOLE)
-        //     OSSemPost();
-        // if(controller->getLabel() == 'r')
-        //     cout << controller->getOutput() << endl;
+        controller.run();
         OSTimeDlyHMSM(0, 0, 0, 10);
     }
 }
 
 //命令格式要求 <e|i><p|i|d>"number"[+<e|i><p|i|d>"number"]*
-char pid_command[17] = {'\0'};
-
+char pid_cmd[17] = {'\0'};
+uint8_t pid_cmd_update = 0;
 
 void TEST_PID_Init()
 {
@@ -143,63 +132,23 @@ void TEST_PID_Init()
     OSTaskCreate(TEST_PID_EXTERNAL, &ExternalControllerList[1], &Stk_PID_Exteral[511], TASK_PID_ROLL_EXTERNAL_PRIO);
 
     //设置PID 参数调节接收
-    HAL_UART_Receive_IT(&huart1, (uint8_t*)pid_command, 16);
+    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
 }
 
 
-
-//串口回调函数
 //严格格式  <e|i>' 'x.xx' 'x.xx' 'x.xx'
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART1){
-        pid_command[6] = '\0';
-        pid_command[11] = '\0';
-        pid_command[16] = '\0';
-        char type = pid_command[0];
+void Pid_Param_Update(){
+        pid_cmd[6] = '\0';
+        pid_cmd[11] = '\0';
+        pid_cmd[16] = '\0';
+        char type = pid_cmd[0];
         if(type == 'e'){
-            ExternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-            ExternalControllerList[1].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
+            ExternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[7], NULL), strtod(&pid_cmd[12], NULL));
         }
         else if(type == 'i'){
-            InternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-            InternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
+            InternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[7], NULL), strtod(&pid_cmd[12], NULL));
         }
-
-        uint16_t data = USART1->DR;
-		HAL_UART_Receive_IT(&huart1, (uint8_t*)pid_command, 16);
-	}
-}
-
-/**
-  * @brief This function handles USART1 global interrupt.
-  */
-extern "C" void USART1_IRQHandler(void)
-{
-  size_t index = 0;
-  /* USER CODE BEGIN USART1_IRQn 0 */
-  OSIntEnter();
-  /* USER CODE END USART1_IRQn 0 */
-    do{
-        pid_command[index++] = USART1->DR;
-        while(!(USART1->SR & USART_SR_RXNE) && index<16){}
-    }while(index != 16);
-    
-    pid_command[6] = '\0';
-    pid_command[11] = '\0';  
-    pid_command[16] = '\0';
-    char type = pid_command[0];
-    if(type == 'e'){
-        ExternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-        ExternalControllerList[1].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-    }
-    else if(type == 'i'){
-        InternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-        InternalControllerList[0].setParam(strtod(&pid_command[2],NULL),strtod(&pid_command[7], NULL), strtod(&pid_command[12], NULL));
-    }
-  /* USER CODE BEGIN USART1_IRQn 1 */
-  OSIntExit();
-  /* USER CODE END USART1_IRQn 1 */
+		HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
 }
 
 #endif

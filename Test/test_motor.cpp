@@ -25,7 +25,6 @@ using namespace std;
 
 
 void TEST_Task_Motor(void* channel){
-    float duty = 0.06;
     motor m(&htim3,(uint32_t)channel);
     if((uint32_t)channel == TIM_CHANNEL_1){
         motorObjList[0] = &m;
