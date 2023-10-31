@@ -15,15 +15,3 @@ using namespace std;
 #include "test_paper_mad.cpp"
 #include "test_mahony.cpp"
 
-void TEST_stream()
-{
-    cout << "hello" << endl;
-}
-
-void TEST_quaternion()
-{
-    quaternion a= {1,0,0,0};
-    quaternion b{1,1,1,1};
-    quaternion c(1,0,0,0);
-    c += b;
-}

@@ -19,5 +19,7 @@ float quat_get_Pitch(const quaternion& q);
 
 float quat_get_Yaw(const quaternion& q);
 
+quaternion quat2EulerAngle(const quaternion& q);
+
 void ano_send_dataFrame(quaternion& attitude);
 void ano_send_quaternion(quaternion& attiitude);

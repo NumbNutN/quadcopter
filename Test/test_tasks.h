@@ -81,16 +81,6 @@ extern void doNothing(void);
 */
 extern void TEST_Task_MPU6050_Get_Data_Init(void);
 
-extern void test_cpp(void);
-
-extern void test_uart(void);
-
-extern void test_stream(void); 
-
-extern void test_quaternion(void);
-
-extern void test_hmc(void);
-
 extern void TEST_RK4_Init(void);
 
 extern void TEST_Print_Accel_Init(void);

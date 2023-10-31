@@ -9,6 +9,7 @@
 #include "mpu6050.hpp"
 #include "hmc_5583l.hpp"
 #include "gradient_decent.hpp"
+#include "anotc.hpp"
 
 #include "myMath.hpp"
 #include <math.h>
@@ -17,13 +18,13 @@
 #include "delay.h"
 
 #define BETA 0.033
-#define TASK_MAHONY_READ_PRIO 19u
-#define TASK_MAHONY_PRINT_PRIO 18u
+#define TASK_MAHONY_READ_PRIO 18u
+#define TASK_MAHONY_PRINT_PRIO 19u
 
 using namespace std;
 
-OS_STK Stk_Mahony[512];
-OS_STK Stk_PrintMahony[512];
+OS_STK Stk_Mahony[1024];
+OS_STK Stk_PrintMahony[1024];
 
 quaternion earth_magnetic{0,0.66436113595878288,0,0.74741172122703259};
 // quaternion earth_magnetic{0,1,0,0};
@@ -115,10 +116,26 @@ void TEST_Mahony(void* arg){
     }
 }
 
+#define ANO_ATTITUDE_EULERANGLE_FMT 0x03
+#define ANO_ATTITUDE_ENLERANGLE_DATLEN 0x07
+
 void TEST_Task_Print_Attitude(void* arg){
+
+    auto frame = anotcDataFrame<ANO_ATTITUDE_ENLERANGLE_DATLEN>(ANO_ATTITUDE_EULERANGLE_FMT);
+    int8_t data[7];
     for(;;)
     {
         ano_send_dataFrame(attitude);
+        // int16_t roll = quat_get_Roll(attitude) * 100 * 57.3;
+        // int16_t pitch = quat_get_Pitch(attitude) * 100 * 57.3;
+        // int16_t yaw = quat_get_Yaw(attitude) * 100 * 57.3;  
+        // *(int16_t*)data = roll;
+        // *(int16_t*)(data+2) = pitch;
+        // *(int16_t*)(data+4) = yaw;
+        // *(data+6)=0x01;
+
+        // frame.pack(data);
+        // frame.send();
         OSTimeDlyHMSM(0, 0, 0, 100);
     }
 }
@@ -126,8 +143,8 @@ void TEST_Task_Print_Attitude(void* arg){
 
 void TEST_Mahony_Init()
 {
-    OSTaskCreate(TEST_Task_Print_Attitude,NULL,&Stk_PrintMahony[511],TASK_MAHONY_PRINT_PRIO);
-    OSTaskCreate(TEST_Mahony, NULL, &Stk_Mahony[511], TASK_MAHONY_READ_PRIO);
+    OSTaskCreate(TEST_Task_Print_Attitude,NULL,&Stk_PrintMahony[1023],TASK_MAHONY_PRINT_PRIO);
+    OSTaskCreate(TEST_Mahony, NULL, &Stk_Mahony[1023], TASK_MAHONY_READ_PRIO);
 }
 
 

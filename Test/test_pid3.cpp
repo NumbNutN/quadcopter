@@ -62,30 +62,30 @@ void yaw_set_pwm(float beta){
 //内环PID p i d 获取当前角速度 计算出当前角加速度后的回调 获取当前导数（角加速度）
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
 
-pid ExternalControllerList[3] = {
-    pid(0.5,0.1,0.1,
+pid InternalControllerList[3] = {
+    pid(0.05,0,0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm),
-    pid(0.5,0.1,0.1,
+    pid(0.05,0,0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm),
-    pid(0.5,0.1,0.1,
+    pid(0.05,0,0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm)
 };
 
-pid InternalControllerList[3] = {
+pid ExternalControllerList[3] = {
     pid(0.5,0,0,
                     []() -> float{return quat_get_Pitch(attitude);},
-                    [](float tar)->void{ExternalControllerList[0].setTarget(tar);},
+                    [](float tar)->void{InternalControllerList[0].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[1];}),
     pid(0.5,0,0,
                     []() -> float{return quat_get_Roll(attitude);},
-                    [](float tar)->void{ExternalControllerList[1].setTarget(tar);},
+                    [](float tar)->void{InternalControllerList[1].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];}),
     pid(0.5,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
-                    [](float tar)->void{ExternalControllerList[2].setTarget(tar);},
+                    [](float tar)->void{InternalControllerList[2].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];})
 };
 
@@ -117,7 +117,7 @@ void TEST_PID_INTERNAL(void* idx){
 }
 
 //命令格式要求 <e|i><p|i|d>"number"[+<e|i><p|i|d>"number"]*
-char pid_cmd[17] = {'\0'};
+char pid_cmd[20] = {'\0'};
 uint8_t pid_cmd_update = 0;
 
 void TEST_PID_Init()
@@ -126,29 +126,31 @@ void TEST_PID_Init()
     InternalControllerList[1].setLabel('r');
     ExternalControllerList[0].setLabel('P');
     ExternalControllerList[1].setLabel('R');
-    OSTaskCreate(TEST_PID_INTERNAL, &InternalControllerList[0], &Stk_PID_Interal[1023], TASK_PID_PITCH_INTERNAL_PRIO);
-    OSTaskCreate(TEST_PID_INTERNAL, &InternalControllerList[1], &Stk_PID_Interal[511], TASK_PID_ROLL_INTERNAL_PRIO);
-    OSTaskCreate(TEST_PID_EXTERNAL, &ExternalControllerList[0], &Stk_PID_Exteral[1023], TASK_PID_PITCH_EXTERNAL_PRIO);
-    OSTaskCreate(TEST_PID_EXTERNAL, &ExternalControllerList[1], &Stk_PID_Exteral[511], TASK_PID_ROLL_EXTERNAL_PRIO);
+    //OSTaskCreate(TEST_PID_INTERNAL, (void*)0, &Stk_PID_Interal[1023], TASK_PID_PITCH_INTERNAL_PRIO);
+    OSTaskCreate(TEST_PID_INTERNAL, (void*)1, &Stk_PID_Interal[511], TASK_PID_ROLL_INTERNAL_PRIO);
+    //OSTaskCreate(TEST_PID_EXTERNAL, (void*)0, &Stk_PID_Exteral[1023], TASK_PID_PITCH_EXTERNAL_PRIO);
+    OSTaskCreate(TEST_PID_EXTERNAL, (void*)1, &Stk_PID_Exteral[511], TASK_PID_ROLL_EXTERNAL_PRIO);
 
+    //使能IDLE中断以在数据传输完成后陷入中断
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     //设置PID 参数调节接收
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
+    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 19);
 }
 
 
 //严格格式  <e|i>' 'x.xx' 'x.xx' 'x.xx'
 void Pid_Param_Update(){
-        pid_cmd[6] = '\0';
-        pid_cmd[11] = '\0';
-        pid_cmd[16] = '\0';
+        pid_cmd[7] = '\0';
+        pid_cmd[13] = '\0';
+        pid_cmd[19] = '\0';
         char type = pid_cmd[0];
         if(type == 'e'){
-            ExternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[7], NULL), strtod(&pid_cmd[12], NULL));
+            ExternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
         }
         else if(type == 'i'){
-            InternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[7], NULL), strtod(&pid_cmd[12], NULL));
+            InternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
         }
-		HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
+		HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 19);
 }
 
 #endif

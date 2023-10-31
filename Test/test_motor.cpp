@@ -4,6 +4,7 @@
 
 #include "motor.hpp"
 #include "os.h"
+#include "delay.h"
 
 #include <iostream>
 
@@ -26,6 +27,7 @@ using namespace std;
 
 void TEST_Task_Motor(void* channel){
     motor m(&htim3,(uint32_t)channel);
+    uint64_t timeStamp;
     if((uint32_t)channel == TIM_CHANNEL_1){
         motorObjList[0] = &m;
         m.setLabel('a');
@@ -44,8 +46,10 @@ void TEST_Task_Motor(void* channel){
     }
 
     for(;;){
+        float deltaT = (float)(Get_TimeStamp() - timeStamp) / HAL_RCC_GetSysClockFreq();
+        timeStamp = Get_TimeStamp();
         m.updateDuty();
-        OSTimeDlyHMSM(0, 0, 0, 200);
+        OSTimeDlyHMSM(0, 0, 0, 4);
     }
 }
 

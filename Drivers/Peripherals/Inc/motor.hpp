@@ -39,8 +39,8 @@ public:
 	}
 
 	void setDuty(float dutyCycle){
-		if(dutyCycle > MAX_CYCLE_DUTY) dutyCycle = MAX_CYCLE_DUTY;
-		else if(dutyCycle < MIN_CYCLE_DUTY) dutyCycle = MIN_CYCLE_DUTY;
+		if(dutyCycle > MAX_CYCLE_DUTY) _dutyCycle = MAX_CYCLE_DUTY;
+		else if(dutyCycle < MIN_CYCLE_DUTY) _dutyCycle = MIN_CYCLE_DUTY;
 		else _dutyCycle = dutyCycle;
 	}
 

@@ -32,3 +32,11 @@ float quat_get_Yaw(const quaternion& q) {
     return res;
 }
 
+quaternion quat2EulerAngle(const quaternion& q) {
+    return quaternion{
+        0,
+        atan((2*q[0]*q[1] + 2*q[2]*q[3]) / (1-2*q[1]*q[1] - 2*q[2]*q[2])),
+        -asin(2*q[1]*q[3]-2*q[0]*q[2]),
+        atan((2*q[1]*q[2] + 2*q[0]*q[3]) / (1-2*q[2]*q[2] - 2*q[3]*q[3]))
+    };
+}
