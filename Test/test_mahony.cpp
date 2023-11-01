@@ -18,8 +18,6 @@
 #include "delay.h"
 
 #define BETA 0.033
-#define TASK_MAHONY_READ_PRIO 18u
-#define TASK_MAHONY_PRINT_PRIO 19u
 
 using namespace std;
 

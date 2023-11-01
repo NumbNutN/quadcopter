@@ -2,11 +2,6 @@
 
 #if TEST_PID3_EN > 0u
 
-#define TASK_PID_PITCH_EXTERNAL_PRIO 20u
-#define TASK_PID_ROLL_EXTERNAL_PRIO 21u
-#define TASK_PID_PITCH_INTERNAL_PRIO 22u
-#define TASK_PID_ROLL_INTERNAL_PRIO 23u
-
 #include <iostream>
 
 #include "pid.hpp"

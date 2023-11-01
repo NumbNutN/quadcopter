@@ -15,11 +15,6 @@ OS_STK Stk_Motor2Init[MOTOR_STACK_SIZE];
 OS_STK Stk_Motor3Init[MOTOR_STACK_SIZE];
 OS_STK Stk_Motor4Init[MOTOR_STACK_SIZE];
 
-#define TASK_MOTOR1_PRIO 14u
-#define TASK_MOTOR2_PRIO 15u
-#define TASK_MOTOR3_PRIO 16u
-#define TASK_MOTOR4_PRIO 17u
-
 motor* motorObjList[4];
 
 using namespace std;
