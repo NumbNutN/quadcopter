@@ -2,11 +2,13 @@
 
 #if TEST_MOTOR_EN > 0u
 
+#include <iostream>
+
 #include "motor.hpp"
+
 #include "os.h"
 #include "delay.h"
-
-#include <iostream>
+#include "test_tasks.h"
 
 #define MOTOR_STACK_SIZE 256
 
@@ -44,7 +46,7 @@ void TEST_Task_Motor(void* channel){
         float deltaT = (float)(Get_TimeStamp() - timeStamp) / HAL_RCC_GetSysClockFreq();
         timeStamp = Get_TimeStamp();
         m.updateDuty();
-        OSTimeDlyHMSM(0, 0, 0, 4);
+        OSTimeDlyHMSM(0, 0, 0, 10);
     }
 }
 

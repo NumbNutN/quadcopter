@@ -4,18 +4,18 @@
 
 #include <iostream>
 
+#include <math.h>
+
 #include "quaternion.hpp"
 #include "myMath.hpp"
 #include "mpu6050.hpp"
 #include "hmc_5583l.hpp"
 #include "gradient_decent.hpp"
-#include "anotc.hpp"
-
-#include "myMath.hpp"
-#include <math.h>
+//#include "anotc.hpp"
 
 #include "os.h"
 #include "delay.h"
+#include "test_tasks.h"
 
 #define BETA 0.033
 
@@ -119,7 +119,7 @@ void TEST_Mahony(void* arg){
 
 void TEST_Task_Print_Attitude(void* arg){
 
-    auto frame = anotcDataFrame<ANO_ATTITUDE_ENLERANGLE_DATLEN>(ANO_ATTITUDE_EULERANGLE_FMT);
+    //auto frame = anotcDataFrame<ANO_ATTITUDE_ENLERANGLE_DATLEN>(ANO_ATTITUDE_EULERANGLE_FMT);
     int8_t data[7];
     for(;;)
     {

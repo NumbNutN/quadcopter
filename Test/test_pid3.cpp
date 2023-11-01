@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <math.h>
+
 #include "pid.hpp"
 #include "quaternion.hpp"
 
@@ -14,7 +16,7 @@
 
 #include "usart.h"
 #include "os.h"
-#include <math.h>
+#include "test_tasks.h"
 
 using namespace std;
 

@@ -54,10 +54,10 @@ extern void doNothing(void);
 
 #if (TEST_PID_EN > 0u) || (TEST_PID3_EN > 0)
     #define Test_PID_Init TEST_PID_Init
-    #define TASK_PID_PITCH_EXTERNAL_PRIO 20u
-    #define TASK_PID_ROLL_EXTERNAL_PRIO 21u
-    #define TASK_PID_PITCH_INTERNAL_PRIO 22u
-    #define TASK_PID_ROLL_INTERNAL_PRIO 23u
+    #define TASK_PID_PITCH_EXTERNAL_PRIO 18u
+    #define TASK_PID_ROLL_EXTERNAL_PRIO 19u
+    #define TASK_PID_PITCH_INTERNAL_PRIO 20u
+    #define TASK_PID_ROLL_INTERNAL_PRIO 21u
 #else
     #define Test_PID_Init doNothing
 #endif
@@ -80,8 +80,8 @@ extern void doNothing(void);
 
 #if TEST_MAHONY_EN > 0u
     #define Test_Mahony_Init TEST_Mahony_Init
-    #define TASK_MAHONY_READ_PRIO 18u
-    #define TASK_MAHONY_PRINT_PRIO 19u
+    #define TASK_MAHONY_READ_PRIO 22u
+    #define TASK_MAHONY_PRINT_PRIO 23u
 #else
     #defineTest_Madgwick_Init doNothing
 #endif
