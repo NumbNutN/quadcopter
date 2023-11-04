@@ -3,6 +3,7 @@
 
 #include "stm32f4xx.h"
 #include "usart.h"
+#include "os.h"
 
 void ano_send_dataFrame(quaternion& attitude){
     static uint8_t frame[13] = {0xAA,0xFF,0x03,0x07,0,0,0,0,0,0,0x01};
@@ -28,6 +29,7 @@ void ano_send_dataFrame(quaternion& attitude){
 }
 
 void ano_send_quaternion(quaternion& attiitude){
+    OS_CPU_SR cpu_sr;
     static uint8_t frame[15] = {0xAA,0xFF,0x04,0x09,0,0,0,0,0,0,0,0,0x01};
     *(int16_t*)(frame + 4) = attiitude[0]*10000;
     *(int16_t*)(frame + 6) = attiitude[1]*10000;
@@ -40,7 +42,9 @@ void ano_send_quaternion(quaternion& attiitude){
         frame[13] += frame[i];
         frame[14] += frame[13];
     }
+    OS_ENTER_CRITICAL();
     HAL_UART_Transmit(&huart1, (uint8_t*)frame, 15, HAL_MAX_DELAY);
+    OS_EXIT_CRITICAL();
 }
 
 

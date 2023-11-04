@@ -83,7 +83,7 @@ extern void doNothing(void);
     #define TASK_MAHONY_READ_PRIO 22u
     #define TASK_MAHONY_PRINT_PRIO 23u
 #else
-    #defineTest_Madgwick_Init doNothing
+    #define Test_Mahony_Init doNothing
 #endif
 
 /**

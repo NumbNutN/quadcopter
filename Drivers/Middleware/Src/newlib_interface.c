@@ -111,8 +111,8 @@ _getpid (void) {return 0;}
 
 int	_isatty (int fd){return 0;}
 
-void	_exit		(int sig){}
-
+void    _exit       (int sig){
+    while(1){}
 }
-
+}
 

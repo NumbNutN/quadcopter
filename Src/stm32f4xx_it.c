@@ -208,7 +208,7 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles TIM1 capture compare interrupt.
   */
-void TIM1_CC_IRQHandler(void)
+void __attribute__((weak)) TIM1_CC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
   OSIntEnter();
