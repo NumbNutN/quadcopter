@@ -2,7 +2,7 @@
 #include "os.h"
 #include "delay.h"
 
-#define DELAY_TIME	10
+#define DELAY_TIME  1
 
 
 /**
