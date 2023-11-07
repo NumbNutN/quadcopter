@@ -2,8 +2,8 @@
 #include "os.h"
 #include "delay.h"
 
-#define DELAY_TIME	10
-
+#define DELAY_TIME  500
+#define I2C_Delay delay_ns
 
 /**
   * @brief SDA线输入模式配置
@@ -12,13 +12,7 @@
   */
 void SDA_Input_Mode()
 {
-    GPIO_InitTypeDef GPIO_InitStructure = {0};
-
-    GPIO_InitStructure.Pin = GPIO_PIN_9;
-    GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStructure.Pull = GPIO_PULLUP;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIOB->MODER &= ~(GPIO_MODER_MODER9);
 }
 
 /**
@@ -28,13 +22,8 @@ void SDA_Input_Mode()
   */
 void SDA_Output_Mode()
 {
-    GPIO_InitTypeDef GPIO_InitStructure = {0};
-
-    GPIO_InitStructure.Pin = GPIO_PIN_9;
-    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStructure.Pull = GPIO_NOPULL;
-    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIOB->BSRR |= GPIO_PIN_9;
+    GPIOB->MODER |= GPIO_MODER_MODE9_0;
 }
 
 /**
@@ -78,11 +67,10 @@ void SCL_Output( uint16_t val )
   */
 uint8_t SDA_Input(void)
 {
-	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9) == GPIO_PIN_SET){
-		return 1;
-	}else{
-		return 0;
-	}
+    if(GPIOB->IDR & GPIO_IDR_ID9)
+        return 1;
+    else
+        return 0;
 }
 
 /**
@@ -93,13 +81,13 @@ uint8_t SDA_Input(void)
 void I2CStart(void)
 {
     SDA_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SDA_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
 }
 
 /**
@@ -110,13 +98,13 @@ void I2CStart(void)
 void I2CStop(void)
 {
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SDA_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SDA_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
 
 }
 
@@ -129,13 +117,13 @@ unsigned char I2CWaitAck(void)
 {
     unsigned short cErrTime = 5;
     SDA_Input_Mode();
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     while(SDA_Input())
     {
         cErrTime--;
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         if (0 == cErrTime)
         {
             SDA_Output_Mode();
@@ -145,7 +133,7 @@ unsigned char I2CWaitAck(void)
     }
     SDA_Output_Mode();
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     return SUCCESS;
 }
 
@@ -157,12 +145,12 @@ unsigned char I2CWaitAck(void)
 void I2CSendAck(void)
 {
     SDA_Output(0);
-    delay_us(DELAY_TIME);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
 
 }
 
@@ -174,12 +162,12 @@ void I2CSendAck(void)
 void I2CSendNotAck(void)
 {
     SDA_Output(1);
-    delay_us(DELAY_TIME);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(1);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
 
 }
 
@@ -194,16 +182,16 @@ void I2CSendByte(unsigned char cSendByte)
     while (i--)
     {
         SCL_Output(0);
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         SDA_Output(cSendByte & 0x80);
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         cSendByte += cSendByte;
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         SCL_Output(1);
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
     }
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     //ADD 发送字节结束后将SDA重新拉高
     SDA_Output(1);
 }
@@ -222,14 +210,14 @@ unsigned char I2CReceiveByte(void)
     {
         cR_Byte += cR_Byte;
         SCL_Output(0);
-        delay_us(DELAY_TIME);
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         SCL_Output(1);
-        delay_us(DELAY_TIME);
+        I2C_Delay(DELAY_TIME);
         cR_Byte |=  SDA_Input();
     }
     SCL_Output(0);
-    delay_us(DELAY_TIME);
+    I2C_Delay(DELAY_TIME);
     SDA_Output_Mode();
     return cR_Byte;
 }
@@ -302,7 +290,7 @@ void SOFT_I2C_Transfer(uint32_t i2c, uint8_t waddr, const uint8_t *w, size_t wn,
     OS_CPU_SR cpu_sr;
     uint8_t tmp_wn = wn;
     uint8_t tmp_rn = rn;
-    OS_ENTER_CRITICAL();
+    // OS_ENTER_CRITICAL();
     if(tmp_wn > 0){
         I2CStart();
         I2CSendByte(waddr);        
@@ -324,5 +312,5 @@ void SOFT_I2C_Transfer(uint32_t i2c, uint8_t waddr, const uint8_t *w, size_t wn,
         }
     }
     if(rn > 0 || wn > 0)I2CStop();
-    OS_EXIT_CRITICAL();
+    // OS_EXIT_CRITICAL();
 }

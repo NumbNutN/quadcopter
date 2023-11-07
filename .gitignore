@@ -1,6 +1,7 @@
 ##Develop Tooltrain
 .vscode
 .cache
+.clangd
 compile_commands.json
-##Temp Directory when building the project
+##Temp Files
 build
