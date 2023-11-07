@@ -19,9 +19,7 @@
 #include <stdint.h>
 class mpu6050 {
 private:
-  uint8_t buffer[14];
-  uint8_t *_accelerometer_data_ptr;
-  uint8_t *_gyroscope_data_ptr;
+
   float gk;
   float ak;
   float _xOffset = 0.0f;
@@ -32,6 +30,9 @@ private:
   float _deltaT;
 
 public:
+  uint8_t buffer[14];
+  uint8_t *_accelerometer_data_ptr;
+  uint8_t *_gyroscope_data_ptr;
   mpu6050() {
     // 内部晶振设为8Mhz 不睡眠 不循环 关闭温度采样
     uint8_t cfgFreq[2] = {MPU6050_POWER_MANAGER_1, MPU6050_PWR_MGMT_1_TEMP_DIS};
@@ -71,13 +72,12 @@ public:
                  buf, size);
   }
   void update() {
-    OS_CPU_SR cpu_sr;
-    OS_ENTER_CRITICAL();
     _last_gyro = get_current_gyro();
-    read(buffer, MPU6050_ACCELEROMETER, 14);
+
+    read(_accelerometer_data_ptr, MPU6050_ACCELEROMETER, 6);
+    read(_gyroscope_data_ptr, MPU6050_GYRO_XYZ_BASE, 6);
     _deltaT = (float)(Get_TimeStamp() - _timeStamp) / HAL_RCC_GetSysClockFreq();
     _timeStamp = Get_TimeStamp();
-    OS_EXIT_CRITICAL();
   }
   quaternion get_current_gyro() {
     short xout, yout, zout;
@@ -111,4 +111,6 @@ public:
     _yOffset = totalY * gk;
     _zOffset = totalZ * gk;
   }
+
+  friend void mpu6050_send_sensor();
 };

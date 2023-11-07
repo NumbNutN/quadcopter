@@ -39,9 +39,10 @@ public:
     void run(){
         if(_tar_is_set){
             _cur_output_signal = get_cur_val();
-            _accumated_error += _cur_output_signal;
-            control_signal = _kp* (_reference_signal - _cur_output_signal) + _ki*_accumated_error + _kd* (get_differentiate?get_differentiate():_builtin_get_differentiate());
+            _accumated_error += _reference_signal - _cur_output_signal;
+            control_signal = _kp* (_reference_signal - _cur_output_signal) + _ki*_accumated_error - _kd* (get_differentiate?get_differentiate():_builtin_get_differentiate());
             callback(control_signal);
+            _last_output_signal = _cur_output_signal;
         }
     }
 
@@ -52,8 +53,6 @@ public:
     void setTarget(float target){
         _reference_signal = target;
         _accumated_error = 0;
-        _cur_output_signal = 0;
-        _last_output_signal = 0;
         _tar_is_set = true;
     }
 

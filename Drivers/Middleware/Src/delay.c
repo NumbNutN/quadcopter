@@ -32,9 +32,9 @@ void delay_ms(uint32_t delay)
         tcnt = Get_TimeStamp() - told;
 }
 
-void delay_ns(uint32_t delay)
-{
-    uint64_t ticks = delay*SysTick->LOAD*OS_TICKS_PER_SEC / 1e9, tcnt = 0;
+void delay_ns(uint32_t delay) {
+    static float k = SysTick->LOAD*OS_TICKS_PER_SEC / 1e9;
+    uint64_t ticks = delay*k, tcnt = 0;
     uint64_t told = Get_TimeStamp();
     while(tcnt < ticks)
         tcnt = Get_TimeStamp() - told;

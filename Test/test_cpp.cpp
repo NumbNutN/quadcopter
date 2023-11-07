@@ -14,4 +14,5 @@ using namespace std;
 #include "test_madgrick.cpp"
 #include "test_paper_mad.cpp"
 #include "test_mahony.cpp"
+#include "test_anotc.cpp"
 

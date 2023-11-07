@@ -81,9 +81,16 @@ extern void doNothing(void);
 #if TEST_MAHONY_EN > 0u
     #define Test_Mahony_Init TEST_Mahony_Init
     #define TASK_MAHONY_READ_PRIO 22u
-    #define TASK_MAHONY_PRINT_PRIO 23u
+
 #else
     #define Test_Mahony_Init doNothing
+#endif
+
+#if TEST_ANOTC_EN > 0u
+    #define TASK_ANOTC_INFO_TRAN_PRIO 23u
+    #define Test_Anotc_Conn_Init TEST_Anotc_Conn_Init
+#else
+    #define Test_Anotc_Conn_Init doNothing
 #endif
 
 /**
@@ -104,3 +111,5 @@ extern void TEST_HMC_Init(void);
 extern void TEST_Madgwick_Init(void);
 
 extern void TEST_Mahony_Init(void);
+
+extern void TEST_Anotc_Conn_Init(void);

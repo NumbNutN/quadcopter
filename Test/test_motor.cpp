@@ -19,6 +19,7 @@ OS_STK Stk_Motor4Init[MOTOR_STACK_SIZE];
 
 
 using namespace std;
+void pedal_update(motor& m);
 
 void TEST_Task_Motor(void* channel){
     motor m(&htim3,(uint32_t)channel);
@@ -60,6 +61,14 @@ void TEST_Motor_Init()
 }
 
 uint32_t channel_signal[8];
+
+void pedal_update(motor& m){
+    float duty = channel_signal[2] /(float)200;
+    if(duty < 0.5)duty=0.5;
+    if(duty > 1)duty = 1;
+    m.setDuty(duty);
+}
+
 /**
   * @brief This function handles TIM1 capture compare interrupt.
   *        这个中断只响应上升沿触发
@@ -79,6 +88,7 @@ extern "C" void TIM1_CC_IRQHandler(void)
     TIM1->CR1 |= TIM_CR1_CEN; /* 使能定时器 */
     if(cnt > ppm_startsig_threshole){
       idx = 0;            /* 说明当前是ppm起始信号 */
+      for(int i=0;i<4;++i)pedal_update(*motorObjList[i]);
     }
     else if(idx<8){
       channel_signal[idx++] = cnt;
