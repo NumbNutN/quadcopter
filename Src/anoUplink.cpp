@@ -1,5 +1,5 @@
 #include "quaternion.hpp"
-#include "myMath.hpp"
+#include "quat_math.hpp"
 
 #include "stm32f4xx.h"
 #include "usart.h"

@@ -7,9 +7,8 @@
 #include "gradient_decent.hpp"
 #include "hmc_5583l.hpp"
 #include "mpu6050.hpp"
-#include "myMath.hpp"
 #include "quaternion.hpp"
-#include "myMath.hpp"
+#include "quat_math.hpp"
 
 #include <math.h>
 
@@ -57,7 +56,6 @@ quaternion get_origin_attitude() {
     quaternion accel_grad = accelator_gradient(attitude, accel);
     s += accel_grad & accel_grad;
     attitude = attitude - step / sqrt(s + c) * accel_grad;
-    ano_send_dataFrame(attitude);
   } while (--i);
 }
 

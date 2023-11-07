@@ -13,7 +13,6 @@
     #define TEST_I2C_MPU6050_EN    0u
     #define TEST_RK4_EN         0u
     #define TEST_PRINT_ACCEL_EN         0u
-    #define TEST_PID_EN             0u
     #define TEST_PID3_EN        1u
 
     #ifdef TEST_PID3_EN         
@@ -24,7 +23,6 @@
     #define TEST_MOTOR_EN       1u
     #define TEST_MADGRICK_EN    0u
     #define TEST_MAHONY_EN      1u
-    #define TEST_PAPER_MADGRICK_EN  0u
 
     #define TEST_UART_EN        0u
     #define TEST_COUT_EN        0u

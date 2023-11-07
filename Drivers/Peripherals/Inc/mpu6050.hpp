@@ -13,7 +13,7 @@
 #define MPU6050_ACCELEROMETER 0x3B
 #include "delay.h"
 #include "i2c.h"
-#include "myMath.hpp"
+#include "quat_math.hpp"
 #include "os.h"
 #include "quaternion.hpp"
 #include <stdint.h>

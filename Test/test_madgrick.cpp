@@ -4,7 +4,7 @@
 #include "gradient_decent.hpp"
 #include "hmc_5583l.hpp"
 #include "mpu6050.hpp"
-#include "myMath.hpp"
+#include "quat_math.hpp"
 #include "os.h"
 #include "quaternion.hpp"
 #include "test_tasks.h"

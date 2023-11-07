@@ -69,7 +69,6 @@ Drivers/Middleware/Src/soft_i2c.c \
 Drivers/Middleware/Src/delay.c \
 Drivers/Middleware/Src/newlib_interface.c \
 \
-Drivers/Peripherals/Src/mpu6050.c \
 Drivers/Peripherals/Src/ssd1306_i2c.c \
 \
 Src/system_stm32f4xx.c \

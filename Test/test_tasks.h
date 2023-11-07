@@ -72,7 +72,7 @@ extern void doNothing(void);
     #define Test_Motor_Init doNothing
 #endif
 
-#if (TEST_MADGRICK_EN > 0u) || (TEST_PAPER_MADGRICK_EN >0u)
+#if TEST_MADGRICK_EN > 0u
     #define Test_Madgwick_Init TEST_Madgwick_Init
 #else
     #define Test_Madgwick_Init doNothing

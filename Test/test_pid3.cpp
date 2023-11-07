@@ -9,7 +9,7 @@
 #include "pid.hpp"
 #include "quaternion.hpp"
 
-#include "myMath.hpp"
+#include "quat_math.hpp"
 #include "motor.hpp"
 #include "mpu6050.hpp"
 #include "hmc_5583l.hpp"

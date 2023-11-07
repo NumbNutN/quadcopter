@@ -7,7 +7,7 @@
 
 #include "test_tasks.h"
 
-#include "myMath.hpp"
+#include "quat_math.hpp"
 #include "anotc.hpp"
 #include "quaternion.hpp"
 #include "mpu6050.hpp"
