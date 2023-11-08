@@ -30,8 +30,7 @@ extern hmc_558l* hmc_ptr;
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
-
-extern motor* motorObjList[4];
+extern motor motorList[4];
 
 const float expK = 10000000;
 float omega_g = 441.708435;
@@ -39,17 +38,17 @@ float omega_g = 441.708435;
 float k = 1;
 
 void pitch_set_pwm(float alpha){
-    motorObjList[2]->setAddDuty(- k*alpha);
-    motorObjList[3]->setAddDuty(- k*alpha);
-    motorObjList[0]->setAddDuty(k*alpha);
-    motorObjList[1]->setAddDuty(k*alpha);
+    motorList[2].setAddDuty(- k*alpha);
+    motorList[3].setAddDuty(- k*alpha);
+    motorList[0].setAddDuty(k*alpha);
+    motorList[1].setAddDuty(k*alpha);
 }
 
 void roll_set_pwm(float alpha){
-    motorObjList[1]->setAddDuty2(- k*alpha);
-    motorObjList[3]->setAddDuty2(- k*alpha);
-    motorObjList[2]->setAddDuty2(k*alpha);
-    motorObjList[0]->setAddDuty2(k*alpha);
+    motorList[1].setAddDuty2(- k*alpha);
+    motorList[3].setAddDuty2(- k*alpha);
+    motorList[2].setAddDuty2(k*alpha);
+    motorList[0].setAddDuty2(k*alpha);
 }
 
 void yaw_set_pwm(float beta){
@@ -137,8 +136,6 @@ void TEST_PID_INTERNAL(void* idx){
     }
 }
 #endif
-//命令格式要求 <e|i><p|i|d>"number"[+<e|i><p|i|d>"number"]*
-char pid_cmd[20] = {'\0'};
 
 void TEST_PID_Init()
 {
@@ -165,31 +162,6 @@ void TEST_PID_Init()
     OSTaskNameSet(TASK_PID_ROLL_EXTERNAL_PRIO,(INT8U*)"EPID_ROLL",&err);
     OSTaskNameSet(TASK_PID_PITCH_EXTERNAL_PRIO,(INT8U*)"EPID_PITCH",&err);
 
-    //使能IDLE中断以在数据传输完成后陷入中断
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
-    //使能DMA传输
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 19);
-
 }
-
-//严格格式  <e|i>' 'x.xx' 'x.xx' 'x.xx'
-void Pid_Param_Update(){
-        pid_cmd[7] = '\0';
-        pid_cmd[13] = '\0';
-        pid_cmd[19] = '\0';
-        char type = pid_cmd[0];
-        if(type == 'e'){
-            ExternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
-            ExternalControllerList[0].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
-        }
-#if PID3_SERIE > 0u
-        else if(type == 'i'){
-            InternalControllerList[1].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
-            InternalControllerList[0].setParam(strtod(&pid_cmd[2],NULL),strtod(&pid_cmd[8], NULL), strtod(&pid_cmd[14], NULL));
-        }
-#endif
-		HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 19);
-}
-
 
 #endif

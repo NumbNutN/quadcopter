@@ -11,11 +11,6 @@ uint32_t Get_Systick_Cnt()
     return _count_systick;
 }
 
-void delay_init()
-{
-    SysTick->LOAD = HAL_RCC_GetSysClockFreq() / OS_TICKS_PER_SEC;
-}
-
 void delay_s(uint32_t delay)
 {
     uint64_t ticks = delay*SysTick->LOAD*OS_TICKS_PER_SEC, tcnt = 0;

@@ -19,19 +19,21 @@ void Task_Init(void){
 /**
  * @brief Initial the peripherals hardware 
 */
-void Peripherals_Init(void){
+extern "C" void PeripheralsInit(void){
 
     I2C_Init((uint32_t)I2C1);
-    // SSD1306_Init();
-    // OLED_Clean();
+}
 
+/**
+ * @brief Initial the system clock frequency to fit in ucOS ticks
+*/
+extern "C" void SysClkInit()
+{
+    SysTick->LOAD = HAL_RCC_GetSysClockFreq() / OS_TICKS_PER_SEC;
 }
 
 void Test_Task_Init(void){
-    //MPU6050 Read Data
-    Test_Task_MPU6050_Get_Data_Init();
     Test_RK4_Init();
-    Test_Print_Accel_Init();
     Test_PID_Init();
     Test_Motor_Init();
     Test_Madgwick_Init();
@@ -40,8 +42,8 @@ void Test_Task_Init(void){
 }
 
 void Test_Bf_OS(void){
-    test_uart();
-    test_stream();
-    test_quaternion();
-    test_hmc();
+#if TEST_SHELL_EN > 0u
+    TEST_shell();
+#endif
+    PeripheralsInit();
 }

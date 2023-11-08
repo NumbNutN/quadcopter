@@ -92,9 +92,13 @@ LoopFillZerobss:
   bcc FillZerobss
 
 /* Call the clock system initialization function.*/
-  bl  SystemInit   
+  bl SystemInit   
+/* Call the Systick intialization */
+  bl SysClkInit
+/* To intialize I2C bus and other peripheral. */
+  //bl PeripheralsInit
 /* Call static constructors */
-    bl __libc_init_array
+  bl __libc_init_array
 /* Call the application's entry point.*/
   bl  main
   bx  lr    

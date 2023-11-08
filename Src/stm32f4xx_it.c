@@ -219,11 +219,14 @@ void __attribute__((weak)) TIM1_CC_IRQHandler(void)
   /* USER CODE END TIM1_CC_IRQn 1 */
 }
 
-extern void Pid_Param_Update();
-extern char pid_cmd[17];
+
 /**
   * @brief This function handles USART1 global interrupt.
   */
+#include "shell.hpp"
+#if TEST_SHELL_EN > 0u
+extern sh shell;
+#endif
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
@@ -231,11 +234,14 @@ void USART1_IRQHandler(void)
   //判断中断响应类型
   if(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE) != RESET){
     __HAL_UART_CLEAR_IDLEFLAG(&huart1);
-    size_t unread  =  __HAL_DMA_GET_COUNTER(&hdma_usart1_rx); /*获取DMA中未传输的数据个数*/ 
-#if TEST_PID3_EN > 0u
-    Pid_Param_Update(); 
+    
+    //shell 响应命令
+#if TEST_SHELL_EN > 0u
+    shell.parse();
+    shell.run();
+
     //使能DMA传输
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)pid_cmd, 16);
+    HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 19);
 #endif
   }
   /* USER CODE END USART1_IRQn 0 */

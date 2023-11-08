@@ -11,4 +11,5 @@ using namespace std;
 #include "test_madgrick.cpp"
 #include "test_mahony.cpp"
 #include "test_anotc.cpp"
+#include "test_shell.cpp"
 

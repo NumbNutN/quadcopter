@@ -1,6 +1,5 @@
 #include "config.h"
 #include "motor.hpp"
-motor* motorObjList[4];
 #if TEST_MOTOR_EN > 0u
 #include "stm32f4xx.h"
 #include <assert.h>
@@ -9,49 +8,37 @@ motor* motorObjList[4];
 #include "delay.h"
 #include "test_tasks.h"
 
-
-
 #define MOTOR_STACK_SIZE 256
 OS_STK Stk_Motor1Init[MOTOR_STACK_SIZE];
 OS_STK Stk_Motor2Init[MOTOR_STACK_SIZE];
 OS_STK Stk_Motor3Init[MOTOR_STACK_SIZE];
 OS_STK Stk_Motor4Init[MOTOR_STACK_SIZE];
 
+motor motorList[4] = {
+  motor(&htim3,(uint32_t)TIM_CHANNEL_1,'1'),
+  motor(&htim3,(uint32_t)TIM_CHANNEL_2,'2'),
+  motor(&htim3,(uint32_t)TIM_CHANNEL_3,'3'),
+  motor(&htim3,(uint32_t)TIM_CHANNEL_4,'4')
+};
 
 using namespace std;
 void pedal_update(motor& m);
 
-void TEST_Task_Motor(void* channel){
-    motor m(&htim3,(uint32_t)channel);
-    uint64_t timeStamp;
-    if((uint32_t)channel == TIM_CHANNEL_1){
-        motorObjList[0] = &m;
-        m.setLabel('a');
-    }
-    else if ((uint32_t)channel == TIM_CHANNEL_2){
-        motorObjList[1] = &m;
-        m.setLabel('b');
-    }
-    else if ((uint32_t)channel == TIM_CHANNEL_3){
-        motorObjList[2] = &m;
-        m.setLabel('c');
-    }
-    else{
-        motorObjList[3] = &m;
-        m.setLabel('d');
-    }
+void TEST_Task_Motor(void* index){
+    motor& m = motorList[(size_t)index];
+    m.init();
     for(;;){
         m.updateDuty();
         OSTimeDlyHMSM(0, 0, 0, 10);
     }
-}
+}  
 void TEST_Motor_Init()
 {
     OS_ERR err;
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_1, &Stk_Motor1Init[MOTOR_STACK_SIZE-1], TASK_MOTOR1_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_2, &Stk_Motor2Init[MOTOR_STACK_SIZE-1], TASK_MOTOR2_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_3, &Stk_Motor3Init[MOTOR_STACK_SIZE-1], TASK_MOTOR3_PRIO);
-    OSTaskCreate(TEST_Task_Motor, (void*)TIM_CHANNEL_4, &Stk_Motor4Init[MOTOR_STACK_SIZE-1], TASK_MOTOR4_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)0, &Stk_Motor1Init[MOTOR_STACK_SIZE-1], TASK_MOTOR1_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)1, &Stk_Motor2Init[MOTOR_STACK_SIZE-1], TASK_MOTOR2_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)2, &Stk_Motor3Init[MOTOR_STACK_SIZE-1], TASK_MOTOR3_PRIO);
+    OSTaskCreate(TEST_Task_Motor, (void*)3, &Stk_Motor4Init[MOTOR_STACK_SIZE-1], TASK_MOTOR4_PRIO);
     OSTaskNameSet(TASK_MOTOR1_PRIO,(INT8U*)"MOTOR1",&err);
     OSTaskNameSet(TASK_MOTOR2_PRIO,(INT8U*)"MOTOR2",&err);
     OSTaskNameSet(TASK_MOTOR3_PRIO,(INT8U*)"MOTOR3",&err);
@@ -88,7 +75,7 @@ extern "C" void TIM1_CC_IRQHandler(void)
     TIM1->CR1 |= TIM_CR1_CEN; /* 使能定时器 */
     if(cnt > ppm_startsig_threshole){
       idx = 0;            /* 说明当前是ppm起始信号 */
-      for(int i=0;i<4;++i)pedal_update(*motorObjList[i]);
+      for(int i=0;i<4;++i)pedal_update(motorList[i]);
     }
     else if(idx<8){
       channel_signal[idx++] = cnt;

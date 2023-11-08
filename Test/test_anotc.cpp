@@ -21,7 +21,7 @@ extern mpu6050* mpu6050_ptr;
 #define ANO_ATTITUDE_EULERANGLE_FMT 0x03
 #define ANO_ATTITUDE_ENLERANGLE_DATLEN 0x07
 void send_euler_angle(){
-  auto frame =
+  static auto frame =
     anotcDataFrame<ANO_ATTITUDE_ENLERANGLE_DATLEN>(ANO_ATTITUDE_EULERANGLE_FMT);
   int8_t data[7];
     int16_t roll = quat_get_Roll(attitude) * 100 * 57.3;
@@ -42,7 +42,7 @@ void mpu6050_send_sensor(){
     auto accel = mpu6050_ptr->_accelerometer_data_ptr;
     auto gyro = mpu6050_ptr->_gyroscope_data_ptr;
     int8_t sensor_data[13];
-    auto sensor_frame = 
+    static auto sensor_frame = 
     anotcDataFrame<ANO_SENSOR_DATLEN>(ANO_SENSOR_FMT);
 
     *(((int16_t*)sensor_data)) = ((accel[0] << 8) | accel[1])/16384;
@@ -62,7 +62,7 @@ void mpu6050_send_sensor(){
 void send_gyro(){
     int8_t data[ANO_GYRO_DATLEN];
     auto gyro = mpu6050_ptr->_gyroscope_data_ptr;
-    auto frame =
+    static auto frame =
     anotcDataFrame<ANO_GYRO_DATLEN>(ANO_GYRO);
     
     *(int16_t*)data = ((int16_t)((gyro[0] << 8) | gyro[1]))/0.65500f;
@@ -80,7 +80,7 @@ void send_gyro(){
 extern pid ExternalControllerList[3];
 void send_ext_output(){
     int8_t data[ANO_EXTERNAL_DATLEN];
-    auto frame =
+    static auto frame =
     anotcDataFrame<ANO_EXTERNAL_DATLEN>(ANO_EXTERNAL_OUTPUT);
     
     *(int16_t*)data = ExternalControllerList[1].getOutput()*5732.4;
@@ -98,7 +98,7 @@ void send_ext_output(){
 #define ANO_ROLL_INT_ANGULAR_ACCEL_DATLEN 0x04
 extern pid InternalControllerList[3];
 void inter_out_and_angular_acceleration(){
-    auto frame =
+    static auto frame =
         anotcDataFrame<ANO_ROLL_INT_ANGULAR_ACCEL_DATLEN>(ANO_ROLL_INT_ANGULAR_ACCEL);
     /* 内环输出值 */
     int8_t dat[ANO_ROLL_INT_ANGULAR_ACCEL_DATLEN];
@@ -114,13 +114,18 @@ void inter_out_and_angular_acceleration(){
     frame.send();
 }
 #endif
+/**
+ * @brief 打印飞行时数据
+*/
+uint8_t internal_pid_outputSig_AngularAcceleration_en =0;
 void TEST_Task_Info_Tran(void *arg) {
-
   for (;;) {
     send_euler_angle();
     send_gyro();
     send_ext_output(); 
-    //inter_out_and_angular_acceleration();
+    if(internal_pid_outputSig_AngularAcceleration_en){
+      inter_out_and_angular_acceleration();
+    }
     OSTimeDlyHMSM(0, 0, 0, 50);
   }
 }
