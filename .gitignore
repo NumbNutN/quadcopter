@@ -1,0 +1,7 @@
+##Develop Tooltrain
+.vscode
+.cache
+.clangd
+compile_commands.json
+##Temp Files
+build
