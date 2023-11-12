@@ -38,25 +38,26 @@ int Pid_Param_Update(int argc,char** argv){
     return 0;
 }
 
+#if TEST_PID3_EN > 0u
 extern uint8_t internal_pid_outputSig_AngularAcceleration_en;
 
 int InternalPID_Data_Capture(int argc,char** argv){
     internal_pid_outputSig_AngularAcceleration_en = 1;
     return 0;
 }
+#endif
 
 sh shell;
 void TEST_shell(){
     /* 注册shell指令 */
 #if TEST_PID3_EN > 0u
     shell.registerCmd((char*)"pid", Pid_Param_Update);
-#endif
     shell.registerCmd((char*)"intcap", InternalPID_Data_Capture);
-
+#endif
     //使能IDLE中断以在数据传输完成后陷入中断
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     //使能DMA传输
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 19);
+    HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 23);
 }
 
 #endif

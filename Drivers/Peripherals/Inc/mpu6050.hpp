@@ -104,9 +104,9 @@ public:
       totalY += (short)(_gyroscope_data_ptr[2] << 8 | _gyroscope_data_ptr[3]);
       totalZ += (short)(_gyroscope_data_ptr[4] << 8 | _gyroscope_data_ptr[5]);
     }
-    totalX /= times;
-    totalY /= times;
-    totalZ /= times;
+    totalX /= (float)times;
+    totalY /= (float)times;
+    totalZ /= (float)times;
     _xOffset = totalX * gk;
     _yOffset = totalY * gk;
     _zOffset = totalZ * gk;

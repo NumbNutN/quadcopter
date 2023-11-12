@@ -4,12 +4,6 @@
 
 extern void doNothing(void);
 
-#if TEST_RK4_EN > 0
-    #define Test_RK4_Init TEST_RK4_Init
-#else
-    #define Test_RK4_Init doNothing
-#endif
-
 #if (TEST_PID_EN > 0u) || (TEST_PID3_EN > 0)
     #define Test_PID_Init TEST_PID_Init
     #define TASK_PID_PITCH_EXTERNAL_PRIO 18u
@@ -32,6 +26,7 @@ extern void doNothing(void);
 
 #if TEST_MADGRICK_EN > 0u
     #define Test_Madgwick_Init TEST_Madgwick_Init
+    #define TASK_MADGWICK_READ_PRIO 22u
 #else
     #define Test_Madgwick_Init doNothing
 #endif
@@ -51,6 +46,13 @@ extern void doNothing(void);
     #define Test_Anotc_Conn_Init doNothing
 #endif
 
+#if TEST_PRINT_EN > 0u
+    #define TASK_PRINT_PRIO 9u
+    #define Test_Print_Init TEST_Print_Init
+#else
+    #define Test_Print_Init doNothing
+#endif
+
 /**
 * @brief gy-86数据采集
 */
@@ -68,3 +70,5 @@ extern void TEST_Mahony_Init(void);
 extern void TEST_Anotc_Conn_Init(void);
 
 extern void TEST_shell(void);
+
+extern void TEST_Print_Init(void);

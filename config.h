@@ -8,8 +8,7 @@
 #define TEST_EN 1u
 
 #if TEST_EN > 0u
-    #define TEST_RK4_EN                 0u
-    #define TEST_PID3_EN                1u
+    #define TEST_PID3_EN        1u
 
     #ifdef TEST_PID3_EN
         #define PID3_SERIE      1u
@@ -22,6 +21,7 @@
 
     #define TEST_ANOTC_EN       1u
     #define TEST_SHELL_EN       1u
+    #define TEST_PRINT_EN       0u
 
 
 #endif

@@ -35,20 +35,20 @@ extern motor motorList[4];
 const float expK = 10000000;
 float omega_g = 441.708435;
 
-float k = 1;
-
-void pitch_set_pwm(float alpha){
-    motorList[2].setAddDuty(- k*alpha);
-    motorList[3].setAddDuty(- k*alpha);
-    motorList[0].setAddDuty(k*alpha);
-    motorList[1].setAddDuty(k*alpha);
+void pitch_set_pwm(float pid_out){
+    //float dutyCycle = pid_out*mpu6050_ptr->getSamplePeriod() * 26.166f;
+    motorList[2].setAddDuty(- pid_out);
+    motorList[3].setAddDuty(- pid_out);
+    motorList[0].setAddDuty(pid_out);
+    motorList[1].setAddDuty(pid_out);
 }
 
-void roll_set_pwm(float alpha){
-    motorList[1].setAddDuty2(- k*alpha);
-    motorList[3].setAddDuty2(- k*alpha);
-    motorList[2].setAddDuty2(k*alpha);
-    motorList[0].setAddDuty2(k*alpha);
+void roll_set_pwm(float pid_out){
+    //float dutyCycle = pid_out*mpu6050_ptr->getSamplePeriod() * 26.166f;
+    motorList[1].setAddDuty2(- pid_out);
+    motorList[3].setAddDuty2(- pid_out);
+    motorList[2].setAddDuty2(pid_out);
+    motorList[0].setAddDuty2(pid_out);
 }
 
 void yaw_set_pwm(float beta){
@@ -61,27 +61,27 @@ void yaw_set_pwm(float beta){
 #if PID3_SERIE > 0u
 
 pid InternalControllerList[3] = {
-    pid(0.05,0,0.05,
+    pid(0.5,0,0.0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm),
-    pid(0.05,0,0.05,
+    pid(0.5,0,0.0,  
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm),
-    pid(0.05,0,0.05,
+    pid(0.5,0,0.0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm)
 };
 
 pid ExternalControllerList[3] = {
-    pid(5,0,0,
+    pid(0.5,0,0,
                     []() -> float{return quat_get_Pitch(attitude);},
                     [](float tar)->void{InternalControllerList[0].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[1];}),
-    pid(5,0,0,
+    pid(0.5,0,0,
                     []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{InternalControllerList[1].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];}),
-    pid(5,0,0,
+    pid(0.5,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{InternalControllerList[2].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];})

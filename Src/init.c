@@ -33,12 +33,12 @@ extern "C" void SysClkInit()
 }
 
 void Test_Task_Init(void){
-    Test_RK4_Init();
     Test_PID_Init();
     Test_Motor_Init();
     Test_Madgwick_Init();
     Test_Mahony_Init();
     Test_Anotc_Conn_Init();
+    Test_Print_Init();
 }
 
 void Test_Bf_OS(void){

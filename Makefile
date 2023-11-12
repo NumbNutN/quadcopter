@@ -84,8 +84,7 @@ CPP_SOURCES = \
 Test/test_cpp.cpp \
 Src/runge_kutta.cpp \
 Src/quaternion_math.cpp \
-Drivers/Peripherals/Src/receive.cpp \
-Src/anoUplink.cpp
+Drivers/Peripherals/Src/receive.cpp
 
 
 # ASM sources
@@ -183,7 +182,7 @@ LDSCRIPT = STM32F401RETx_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys
-LIBDIR = -L/usr/local/lib/newlib/4.3.0/thumb/v7e-m+fp/hard
+#LIBDIR = -L/usr/local/lib/newlib/4.3.0/thumb/v7e-m+fp/hard
 LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
