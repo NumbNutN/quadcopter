@@ -46,4 +46,7 @@ void Test_Bf_OS(void){
     TEST_shell();
 #endif
     PeripheralsInit();
+    SSD1306_Init();
+    OLED_Clean();
+    TEST_Fs();
 }

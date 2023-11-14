@@ -72,3 +72,5 @@ extern void TEST_Anotc_Conn_Init(void);
 extern void TEST_shell(void);
 
 extern void TEST_Print_Init(void);
+
+extern void TEST_Fs(void);

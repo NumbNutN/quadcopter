@@ -39,6 +39,13 @@ public:
   quaternion conjugate() const {
     return quaternion{dat[0], -dat[1], -dat[2], -dat[3]};
   }
+
+  quaternion no(size_t idx) const {
+      quaternion new_quat = *this;
+      new_quat[idx] = 0;
+      return new_quat;
+  }
+
   friend quaternion operator+(const quaternion &a, const quaternion &b);
   friend quaternion operator*(const quaternion &a, const quaternion &b);
   friend quaternion operator-(const quaternion &a, const quaternion &b);
@@ -86,7 +93,7 @@ template <typename T> quaternion operator/(const quaternion &q, T scale) {
   return quaternion(q[0] / scale, q[1] / scale, q[2] / scale, q[3] / scale);
 }
 inline ostream &operator<<(ostream &out, const quaternion &q) {
-  out << q[0] << " " << q[1] << " " << q[2] << " " << q[3];
+  out << q[1] << " " << q[2] << " " << q[3];
   return out;
 }
 inline quaternion operator^(const quaternion &a, const quaternion &b) {

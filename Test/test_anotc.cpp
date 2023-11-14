@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef TEST_ANOTC_EN
+#if TEST_ANOTC_EN > 0u
 
 #include "os.h"
 #include <stdint.h>
@@ -12,7 +12,7 @@
 #include "quaternion.hpp"
 #include "mpu6050.hpp"
 
-OS_STK Stk_PrintMahony[1024];
+OS_STK Stk_PrintDrone_Info[1024];
 
 extern quaternion attitude;
 extern mpu6050* mpu6050_ptr;
@@ -114,15 +114,16 @@ void inter_out_and_angular_acceleration(){
     frame.send();
 }
 #endif
+
 /**
  * @brief 打印飞行时数据
 */
-uint8_t internal_pid_outputSig_AngularAcceleration_en =0;
+extern uint8_t internal_pid_outputSig_AngularAcceleration_en;
 void TEST_Task_Info_Tran(void *arg) {
   for (;;) {
     send_euler_angle();
-    send_gyro();
-    send_ext_output(); 
+    //send_gyro();
+    //send_ext_output(); 
     if(internal_pid_outputSig_AngularAcceleration_en){
       inter_out_and_angular_acceleration();
     }
@@ -132,7 +133,7 @@ void TEST_Task_Info_Tran(void *arg) {
 
 void TEST_Anotc_Conn_Init() {
   OS_ERR err;
-  OSTaskCreate(TEST_Task_Info_Tran, NULL, &Stk_PrintMahony[511],
+  OSTaskCreate(TEST_Task_Info_Tran, NULL, &Stk_PrintDrone_Info[511],
                TASK_ANOTC_INFO_TRAN_PRIO);
   OSTaskNameSet(TASK_ANOTC_INFO_TRAN_PRIO, (INT8U *)"PRINT_ATTITUDE", &err);
 }

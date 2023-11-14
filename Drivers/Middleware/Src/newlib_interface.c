@@ -1,4 +1,4 @@
-#include "ssd1306_i2c.h"
+
 #include <stdint.h>
 #include <stddef.h>
 #include <reent.h>
@@ -6,39 +6,21 @@
 
 #include "delay.h"
 
-// void putchar(int c){
-//     OLED_ShowChar(0,0,c);
-// }
+#include "fs.hpp"
 
-/* A minimal write */
-// int write(int file,char* ptr,int len){
-//     int i;
-//     for(i=0;i<len;++i)
-//         OLED_ShowChar(0,0,*(ptr++));
-//     return len;
-// }
+extern fs filesys;
 
 extern "C"{
+
+int
+_open (const char * path, int flags, ...){
+    return filesys.open(path);
+}
+
 int
 _write (int file, const void * ptr, size_t len)
 {
-    int i;
-    char ch;
-    // for(i=0;i<len;++i)
-    // {
-    //     OLED_ScreenSwitchCheck();
-    //     ch = *(char*)ptr;
-    //     if(ch == '\n')
-    //         OLED_Newline();
-    //     else
-    //     {
-    //         OLED_Update_Pos();
-    //         OLED_ShowChar(_ssd1306_pos_x,_ssd1306_pos_y,*((char*)ptr++));
-    //     }
-    // }
-    
-    HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
-
+    filesys.write(file, ptr, len);
     return len;
 }
 

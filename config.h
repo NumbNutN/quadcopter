@@ -19,9 +19,11 @@
     #define TEST_MADGRICK_EN    0u
     #define TEST_MAHONY_EN      1u
 
-    #define TEST_ANOTC_EN       1u
+    #define TEST_ANOTC_EN       0u
     #define TEST_SHELL_EN       1u
-    #define TEST_PRINT_EN       0u
+    #define TEST_PRINT_EN       1u
+
+    #define TEST_STREAM_EN      1u
 
 
 #endif

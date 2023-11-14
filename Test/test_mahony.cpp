@@ -9,6 +9,7 @@
 #include "mpu6050.hpp"
 #include "quaternion.hpp"
 #include "quat_math.hpp"
+#include "anotc.hpp"
 
 #include <math.h>
 
@@ -59,6 +60,10 @@ quaternion get_origin_attitude() {
   } while (--i);
 }
 
+/* 惯性传感器数据 */
+#define ANO_MAG_CROSS_FMT 0xF4
+#define ANO_MAG_CROSS_DATLEN 0x04
+auto mag_cross_frame = anotcDataFrame<ANO_MAG_CROSS_DATLEN>(ANO_MAG_CROSS_FMT);
 void TEST_Mahony(void *arg) {
   mpu6050 mpu6050_dev;
   hmc_558l hmc_dev;
@@ -70,22 +75,62 @@ void TEST_Mahony(void *arg) {
   static quaternion old_omega_measure;
   // //校准陀螺仪的零偏误差
   mpu6050_dev.alignment(100);
+
+  //地磁计自测
+  //hmc_dev.test();
+  
+  hmc_dev.measure_earth_magnetic(100);
   // 初始姿态
   get_origin_attitude();
+  //获得大地地磁 TEST0
+  const static quaternion b_measured = hmc_ptr->get_measured_earth_magnetic().normalization();
+  const static quaternion b_E = ((attitude * b_measured * attitude.conjugate()).no(3)).normalization();
+
   for (;;) {
     mpu6050_dev.update();
-    // hmc_dev.update();
+    hmc_dev.update();
     deltaT = mpu6050_dev.getSamplePeriod();
     // 一阶龙格图塔计算姿态
     attitude =
         RK1(0, old_attitude, deltaT, [](double t, quaternion q) -> quaternion {
           float ki = 0.05;
           float kp = 1.5;
+          
           // 反应测量加速度和估计加速度的误差
           quaternion omega_measure;
           quaternion accel = mpu6050_ptr->get_acceleration().normalization();
+
+          quaternion m_b = hmc_ptr->getMagnetic().no(3).normalization(); /* 获取磁力计观测值 */
+          //quaternion b_E = {0,0,(float)sqrt((double)(m_b[1]*m_b[1] + m_b[2]*m_b[2])),m_b[3]}; /* 作为当前地理磁场 */
+          
+          quaternion accel_cross = accel ^ (attitude.conjugate() * earth_accel * attitude);
+          //TEST 1 加入地磁
+          quaternion mag_cross = m_b ^ (attitude.conjugate() * b_E * attitude);
           omega_measure =
-              accel ^ (attitude.conjugate() * earth_accel * attitude);
+            accel_cross;
+//            0.5 *mag_cross;
+#if TEST_PRINT_EN > 0u
+          // static size_t cnt = 0;
+          // ++cnt;
+          // if(cnt == 50){
+          //   cout << "cro " << mag_cross << endl;
+          //   cnt = 0;
+          // }
+#else     
+          //TEST2 打印叉乘
+          //Anotc Uplink协议打印地磁绝对值和测量值的叉乘
+          // static size_t cnt = 0;
+          // ++cnt;
+          // if(cnt == 25){
+          //   auto dat = mag_cross.length();
+          //   mag_cross_frame.pack(&dat,4);
+          //   mag_cross_frame.send();
+          //   cnt = 0;
+          // }
+#endif
+          // TEST3计算磁力计的数据乘以姿态矩阵的结果
+          //quaternion earth_mag = attitude * hmc_ptr->getMagnetic().normalization() * attitude.conjugate();
+          
           quaternion last_gyro = mpu6050_ptr->get_last_gyro();
           integral_omega_measure += ki * omega_measure * deltaT;
 
@@ -94,7 +139,7 @@ void TEST_Mahony(void *arg) {
                  (last_gyro + integral_omega_measure + kp * omega_measure);
         }).normalization();
     old_attitude = attitude;
-    OSTimeDlyHMSM(0, 0, 0, 2);
+    OSTimeDlyHMSM(0, 0, 0, 100);
   }
 }
 

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 
 #include "usart.h"
 
@@ -39,13 +40,27 @@ public:
         memcpy(&_frame[0],&_header[0],dataIdx);
         _frame[functionCodeIdx] = (int8_t)id;
     }
-
+    
+    /* 从地址空间直接打包数据 */
     template <typename T>
     void pack(T data){
         int i=0;
         _frame[scIdx]=0;_frame[acIdx]=0;
         memcpy(&_frame[dataIdx], &data[0], datalen);
         for(;i<dataIdx+datalen;i++){
+            _frame[scIdx] += _frame[i];
+            _frame[acIdx] += _frame[scIdx];
+        }
+    }
+      
+    /* 从地址空间转码后打包数据 */
+    void pack(float* data,int precision){
+        int i=0;
+        _frame[scIdx]=0;_frame[acIdx]=0;
+        for(i=0;i<datalen/2;++i){
+            *((int16_t*)&_frame[dataIdx+i*2]) = (int16_t)(data[i] * pow(10,precision));
+        }
+        for(i=0;i<dataIdx+datalen;i++){
             _frame[scIdx] += _frame[i];
             _frame[acIdx] += _frame[scIdx];
         }
