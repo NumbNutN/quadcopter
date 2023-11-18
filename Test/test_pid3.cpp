@@ -30,30 +30,11 @@ extern hmc_558l* hmc_ptr;
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
-extern motor motorList[4];
+extern std::vector<motor> motorList;
 
 const float expK = 10000000;
 float omega_g = 441.708435;
 
-void pitch_set_pwm(float pid_out){
-    //float dutyCycle = pid_out*mpu6050_ptr->getSamplePeriod() * 26.166f;
-    motorList[2].setAddDuty(- pid_out);
-    motorList[3].setAddDuty(- pid_out);
-    motorList[0].setAddDuty(pid_out);
-    motorList[1].setAddDuty(pid_out);
-}
-
-void roll_set_pwm(float pid_out){
-    //float dutyCycle = pid_out*mpu6050_ptr->getSamplePeriod() * 26.166f;
-    motorList[1].setAddDuty2(- pid_out);
-    motorList[3].setAddDuty2(- pid_out);
-    motorList[2].setAddDuty2(pid_out);
-    motorList[0].setAddDuty2(pid_out);
-}
-
-void yaw_set_pwm(float beta){
-
-}
 
 //内环PID p i d 获取当前角速度 计算出当前角加速度后的回调 获取当前导数（角加速度）
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
@@ -67,7 +48,7 @@ pid InternalControllerList[3] = {
     pid(0.5,0,0.0,  
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm),
-    pid(0.5,0,0.0,
+    pid(0,0,0.0,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm)
 };
@@ -81,7 +62,7 @@ pid ExternalControllerList[3] = {
                     []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{InternalControllerList[1].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];}),
-    pid(0.5,0,0,
+    pid(0,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{InternalControllerList[2].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];})
@@ -116,7 +97,7 @@ OS_EVENT* roll_internal_get_ref;
 #define THRESHOLE 0.02
 
 void TEST_PID_EXTERNAL(void* idx){
-
+    
     pid& controller = ExternalControllerList[size_t(idx)];
     controller.setTarget(0);
     for(;;)

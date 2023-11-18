@@ -20,6 +20,9 @@ extern void doNothing(void);
     #define TASK_MOTOR2_PRIO 15u
     #define TASK_MOTOR3_PRIO 16u
     #define TASK_MOTOR4_PRIO 17u
+    void pitch_set_pwm(float pid_out);
+    void roll_set_pwm(float pid_out);
+    void yaw_set_pwm(float pid_out);
 #else
     #define Test_Motor_Init doNothing
 #endif
@@ -53,6 +56,13 @@ extern void doNothing(void);
     #define Test_Print_Init doNothing
 #endif
 
+#if TEST_RECEIVER_EN > 0u
+    #define TASK_RECEIVER_PRIO 13u
+    #define Test_Receiver_Init TEST_Receiver_Init
+#else
+    #define Test_Receiver_Init doNothing
+#endif
+
 /**
 * @brief gy-86数据采集
 */
@@ -74,3 +84,5 @@ extern void TEST_shell(void);
 extern void TEST_Print_Init(void);
 
 extern void TEST_Fs(void);
+
+extern void TEST_Receiver_Init(void);

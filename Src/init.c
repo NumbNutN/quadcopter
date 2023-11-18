@@ -39,6 +39,7 @@ void Test_Task_Init(void){
     Test_Mahony_Init();
     Test_Anotc_Conn_Init();
     Test_Print_Init();
+    Test_Receiver_Init();
 }
 
 void Test_Bf_OS(void){
