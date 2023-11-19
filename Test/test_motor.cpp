@@ -64,16 +64,19 @@ void roll_set_pwm(float pid_out){
 \___/       \___/
 */
 void yaw_set_pwm(float pid_out){
-    motorList[0].setAddDuty2(pid_out);
-    motorList[1].setAddDuty2(- pid_out);
-    motorList[2].setAddDuty2(- pid_out);
-    motorList[3].setAddDuty2(pid_out);
+    motorList[0].setAddDuty3(pid_out);
+    motorList[1].setAddDuty3(- pid_out);
+    motorList[2].setAddDuty3(- pid_out);
+    motorList[3].setAddDuty3(pid_out);
 }
 
 using namespace std;
-
 void TEST_Task_Motor(void* index){
+    /* 解锁信号出现前，该任务阻塞 */
+    OS_ERR err;
     motor& m = motorList[(size_t)index];
+    //OSSemPend(sem_esc_unlock, 0, &err);
+    m.init();
     for(;;){
         m.updateDuty();
         OSTimeDlyHMSM(0, 0, 0, 10);

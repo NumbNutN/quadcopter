@@ -88,7 +88,7 @@ void TEST_Mahony(void *arg) {
 
   for (;;) {
     mpu6050_dev.update();
-    hmc_dev.update();
+    // hmc_dev.update();
     deltaT = mpu6050_dev.getSamplePeriod();
     // 一阶龙格图塔计算姿态
     attitude =
@@ -139,7 +139,7 @@ void TEST_Mahony(void *arg) {
                  (last_gyro + integral_omega_measure + kp * omega_measure);
         }).normalization();
     old_attitude = attitude;
-    OSTimeDlyHMSM(0, 0, 0, 100);
+    OSTimeDlyHMSM(0, 0, 0, 10);
   }
 }
 

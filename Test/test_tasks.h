@@ -2,14 +2,22 @@
 #include "common.h"
 #include "config.h"
 
+#include "pid.hpp"
+
+#include <vector>
+
 extern void doNothing(void);
 
 #if (TEST_PID_EN > 0u) || (TEST_PID3_EN > 0)
     #define Test_PID_Init TEST_PID_Init
     #define TASK_PID_PITCH_EXTERNAL_PRIO 18u
     #define TASK_PID_ROLL_EXTERNAL_PRIO 19u
-    #define TASK_PID_PITCH_INTERNAL_PRIO 20u
-    #define TASK_PID_ROLL_INTERNAL_PRIO 21u
+    extern std::vector<pid> ExternalControllerList;
+    #if PID3_SERIE > 0u
+        #define TASK_PID_PITCH_INTERNAL_PRIO 20u
+        #define TASK_PID_ROLL_INTERNAL_PRIO 21u
+        extern std::vector<pid> InternalControllerList;
+    #endif
 #else
     #define Test_PID_Init doNothing
 #endif

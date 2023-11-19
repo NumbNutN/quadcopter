@@ -29,8 +29,8 @@ void TEST_Task_Print_Accel_Mag(void* arg){
     {
         quaternion mag = hmc_ptr->getMagnetic().normalization();
         usart <<  mag << " " << mag[1]+mag[2]+mag[3] << endl;
-        // quaternion accel = mpu6050_ptr->get_acceleration();
-        // cout << "a " << accel.normalization() << endl << endl << endl;
+        // quaternion accel = mpu6050_ptr->get_acceleration().normalization();
+        // usart << accel <<" " << accel[1]+accel[2]+accel[3] << endl;
         OSTimeDlyHMSM(0, 0, 0, 200);
     }
 }

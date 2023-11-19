@@ -16,10 +16,6 @@
  *        格式：pid <e|i> FLOAT FLOAT FLOAT
 */
 #include "pid.hpp"
-extern pid ExternalControllerList[3];
-#if PID3_SERIE > 0u
-extern pid InternalControllerList[3];
-#endif
 int Pid_Param_Update(int argc,char** argv){
     char type = argv[1][0];
     float kp = strtod(argv[2],NULL);
@@ -55,9 +51,9 @@ void TEST_shell(){
     shell.registerCmd((char*)"intcap", InternalPID_Data_Capture);
 #endif
     //使能IDLE中断以在数据传输完成后陷入中断
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     //使能DMA传输
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 23);
+    //HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 23);
 }
 
 #endif

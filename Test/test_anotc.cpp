@@ -77,7 +77,6 @@ void send_gyro(){
 #define ANO_EXTERNAL_OUTPUT 0xF1
 #define ANO_EXTERNAL_DATLEN 0x06
 #include "pid.hpp"
-extern pid ExternalControllerList[3];
 void send_ext_output(){
     int8_t data[ANO_EXTERNAL_DATLEN];
     static auto frame =
@@ -96,7 +95,6 @@ void send_ext_output(){
 #ifdef PID3_SERIE
 #define ANO_ROLL_INT_ANGULAR_ACCEL 0xF3
 #define ANO_ROLL_INT_ANGULAR_ACCEL_DATLEN 0x04
-extern pid InternalControllerList[3];
 void inter_out_and_angular_acceleration(){
     static auto frame =
         anotcDataFrame<ANO_ROLL_INT_ANGULAR_ACCEL_DATLEN>(ANO_ROLL_INT_ANGULAR_ACCEL);
@@ -118,7 +116,7 @@ void inter_out_and_angular_acceleration(){
 /**
  * @brief 打印飞行时数据
 */
-extern uint8_t internal_pid_outputSig_AngularAcceleration_en;
+uint8_t internal_pid_outputSig_AngularAcceleration_en;
 void TEST_Task_Info_Tran(void *arg) {
   for (;;) {
     send_euler_angle();

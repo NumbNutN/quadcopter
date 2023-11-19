@@ -6,39 +6,75 @@
 
 #include "motor.hpp"
 #include "receiver.hpp"
+#include "pid.hpp"
 
 #include "os.h"
 
 #include <vector>
-
-extern std::vector<motor> motorList;
+using namespace std;
+extern vector<motor> motorList;
 
 #include "pid.hpp"
 
 void controller_throttle(float sig){
-    for(motor m:motorList)
+    for(motor& m:motorList)
         m.setDuty(sig);
 }
 
-extern pid ExternalControllerList[3];
+
 void controller_move_forward(float sig){
     //定义映射空间
-    constexpr float k_forward = 3.14*1/9/0.25;
+    constexpr float k_forward = 3.14*1/18/0.25;
     ExternalControllerList[0].setTarget((sig - 0.75)*k_forward);
 }
 
 void controller_move_laternal(float sig){
-    constexpr float k_laternal   = 3.14/9/0.25;
+    constexpr float k_laternal   = 3.14/18/0.25;
     ExternalControllerList[1].setTarget((sig - 0.75)*k_laternal);
 }
 
 void controller_direction(float sig){
-    yaw_set_pwm(sig / 10);
+    yaw_set_pwm((sig -0.75) / 10);
 }
 
-void unlock(){
-  for(auto m : motorList){
-    m.init();
+OS_EVENT* sem_esc_unlock;
+/**
+ @brief 只有解锁后PID控制器才会正常工作
+*/
+// void controller_unlock(float sig){
+//   //OS_ERR err;
+//   const float thres = 0.875;
+//   static bool unlocked = false;
+//   /* 当遥控器未识别或未打开保护时 */
+//   if(sig < thres)
+//     unlocked = false;
+//   /* 当遥控器未打开保护或已经解锁时 */
+//   if(sig < thres || unlocked)return;
+//   /* 当遥控器打开保护但未解锁时 */
+//   //OSSemSet(sem_esc_unlock, 4, &err);
+//   OSSemPost(sem_esc_unlock);
+//   OSSemPost(sem_esc_unlock);
+//   OSSemPost(sem_esc_unlock);
+//   OSSemPost(sem_esc_unlock);
+//   unlocked = true;
+// }
+/**
+ @brief 只有解锁后PID控制器才会正常工作
+*/
+void controller_unlock(float sig){
+  const float thres = 0.875;
+  static bool locked = true;
+  if(sig < thres && !locked){
+    for(auto m : motorList){
+      m.lock();
+    }
+    locked = true;
+  }
+  else if(sig >= thres && locked){
+    for(auto m : motorList){
+      m.unlock();
+    }
+    locked = false;
   }
 }
 
@@ -60,6 +96,10 @@ void TEST_Receiver_Init(){
   receiver_manager.register_handler(receiver::LATERAL_MOVE, controller_move_laternal);
   /*rotation*/
   receiver_manager.register_handler(receiver::DIRECTION, controller_direction);
+  /* esc unlock */
+  receiver_manager.register_handler(receiver::UNLOCK, controller_unlock);
+  /* esc unlock sem */
+  sem_esc_unlock = OSSemCreate(0);
   OSTaskCreate(task_controller_run, (void*)0, &Stk_Receiver[255], TASK_RECEIVER_PRIO);
 }
 

@@ -30,39 +30,34 @@ extern hmc_558l* hmc_ptr;
 OS_STK Stk_PID_Interal[1024];
 OS_STK Stk_PID_Exteral[1024];
 
-extern std::vector<motor> motorList;
-
-const float expK = 10000000;
-float omega_g = 441.708435;
-
 
 //内环PID p i d 获取当前角速度 计算出当前角加速度后的回调 获取当前导数（角加速度）
 // 外环PID p i d 获取当前角度 计算出当前角速度后的回调  获取当前导数（角速度）
 
 #if PID3_SERIE > 0u
 
-pid InternalControllerList[3] = {
-    pid(0.5,0,0.0,
+vector<pid> InternalControllerList = {
+    pid(0.05,0,0.05,
                         []()->float{return mpu6050_ptr->get_current_gyro()[1];},
                         pitch_set_pwm),
-    pid(0.5,0,0.0,  
+    pid(0.05,0,0.05,
                         []()->float{return mpu6050_ptr->get_current_gyro()[2];},
                         roll_set_pwm),
-    pid(0,0,0.0,
+    pid(0.05,0,0.05,
                         []()->float{return mpu6050_ptr->get_current_gyro()[3];},
                         yaw_set_pwm)
 };
 
-pid ExternalControllerList[3] = {
-    pid(0.5,0,0,
+vector<pid> ExternalControllerList = {
+    pid(5,0,0,
                     []() -> float{return quat_get_Pitch(attitude);},
                     [](float tar)->void{InternalControllerList[0].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[1];}),
-    pid(0.5,0,0,
+    pid(5,0,0,
                     []() -> float{return quat_get_Roll(attitude);},
                     [](float tar)->void{InternalControllerList[1].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[2];}),
-    pid(0,0,0,
+    pid(5,0,0,
                     []() -> float{return quat_get_Yaw(attitude);},
                     [](float tar)->void{InternalControllerList[2].setTarget(tar);},
                     []()->float{return mpu6050_ptr->get_current_gyro()[3];})
@@ -87,17 +82,10 @@ pid ExternalControllerList[3] = {
 
 #endif
 
-
-
-
-OS_EVENT* pitch_internal_get_ref;
-OS_EVENT* yaw_internal_get_ref;
-OS_EVENT* roll_internal_get_ref;
-
 #define THRESHOLE 0.02
 
 void TEST_PID_EXTERNAL(void* idx){
-    
+
     pid& controller = ExternalControllerList[size_t(idx)];
     controller.setTarget(0);
     for(;;)
@@ -143,6 +131,10 @@ void TEST_PID_Init()
     OSTaskNameSet(TASK_PID_ROLL_EXTERNAL_PRIO,(INT8U*)"EPID_ROLL",&err);
     OSTaskNameSet(TASK_PID_PITCH_EXTERNAL_PRIO,(INT8U*)"EPID_PITCH",&err);
 
+    //使能IDLE中断以在数据传输完成后陷入中断
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+
 }
+
 
 #endif

@@ -46,13 +46,13 @@ public:
       return new_quat;
   }
 
-  friend quaternion operator+(const quaternion &a, const quaternion &b);
-  friend quaternion operator*(const quaternion &a, const quaternion &b);
-  friend quaternion operator-(const quaternion &a, const quaternion &b);
+  friend quaternion operator+(const quaternion &lhs, const quaternion &rhs);
+  friend quaternion operator*(const quaternion &lhs, const quaternion &rhs);
+  friend quaternion operator-(const quaternion &lhs, const quaternion &rhs);
   /* 定义叉乘 */
-  friend quaternion operator^(const quaternion &a, const quaternion &b);
+  friend quaternion operator^(const quaternion &lhs, const quaternion &rhs);
   /* 定义点乘 */
-  friend float operator&(const quaternion &a, const quaternion &b);
+  friend float operator&(const quaternion &lhs, const quaternion &rhs);
 
   template <typename T>
   friend quaternion operator*(T scale, const quaternion &q);
@@ -61,27 +61,29 @@ public:
   float &operator[](size_t index) { return dat[index]; }
   // read only
   float operator[](size_t index) const { return dat[index]; }
-  quaternion &operator=(const quaternion &a) = default;
-  quaternion &operator+=(const quaternion &a) {
-    dat[0] += a[0];
-    dat[1] += a[1];
-    dat[2] += a[2];
-    dat[3] += a[3];
+
+  quaternion &operator=(const quaternion &rhs) = default;
+  
+  quaternion &operator+=(const quaternion &rhs) {
+    dat[0] += rhs[0];
+    dat[1] += rhs[1];
+    dat[2] += rhs[2];
+    dat[3] += rhs[3];
     return *this;
   }
 };
-inline quaternion operator+(const quaternion &a, const quaternion &b) {
-  return quaternion(a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]);
+inline quaternion operator+(const quaternion &lhs, const quaternion &rhs) {
+  return quaternion(lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2], lhs[3] + rhs[3]);
 }
-inline quaternion operator-(const quaternion &a, const quaternion &b) {
-  return quaternion(a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3]);
+inline quaternion operator-(const quaternion &lhs, const quaternion &rhs) {
+  return quaternion(lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2], lhs[3] - rhs[3]);
 }
-inline quaternion operator*(const quaternion &a, const quaternion &b) {
+inline quaternion operator*(const quaternion &lhs, const quaternion &rhs) {
 
-  return quaternion(a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
-                    a[1] * b[0] + a[0] * b[1] - a[3] * b[2] + a[2] * b[3],
-                    a[2] * b[0] + a[3] * b[1] + a[0] * b[2] - a[1] * b[3],
-                    a[3] * b[0] - a[2] * b[1] + a[1] * b[2] + a[0] * b[3]);
+  return quaternion(lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2] - lhs[3] * rhs[3],
+                    lhs[1] * rhs[0] + lhs[0] * rhs[1] - lhs[3] * rhs[2] + lhs[2] * rhs[3],
+                    lhs[2] * rhs[0] + lhs[3] * rhs[1] + lhs[0] * rhs[2] - lhs[1] * rhs[3],
+                    lhs[3] * rhs[0] - lhs[2] * rhs[1] + lhs[1] * rhs[2] + lhs[0] * rhs[3]);
 }
 
 // template <typename T>
@@ -96,10 +98,10 @@ inline ostream &operator<<(ostream &out, const quaternion &q) {
   out << q[1] << " " << q[2] << " " << q[3];
   return out;
 }
-inline quaternion operator^(const quaternion &a, const quaternion &b) {
-  return quaternion{0, a[2] * b[3] - a[3] * b[2], a[3] * b[1] - a[1] * b[3],
-                    a[1] * b[2] - a[2] * b[1]};
+inline quaternion operator^(const quaternion &lhs, const quaternion &rhs) {
+  return quaternion{0, lhs[2] * rhs[3] - lhs[3] * rhs[2], lhs[3] * rhs[1] - lhs[1] * rhs[3],
+                    lhs[1] * rhs[2] - lhs[2] * rhs[1]};
 }
-inline float operator&(const quaternion &a, const quaternion &b) {
-  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+inline float operator&(const quaternion &lhs, const quaternion &rhs) {
+  return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2] + lhs[3] * rhs[3];
 }

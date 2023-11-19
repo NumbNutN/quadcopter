@@ -241,7 +241,7 @@ void USART1_IRQHandler(void)
     shell.run();
 
     //使能DMA传输
-    HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 23);
+    //HAL_UART_Receive_DMA(&huart1, (uint8_t*)shell.getCmdBuffer(), 23);
 #endif
   }
   /* USER CODE END USART1_IRQn 0 */
